@@ -15,11 +15,13 @@ You work in these companies : ::ctx.recipient.companies.map( function( c ) retur
 Here are your companies :
 ::do var rand = Math.rand()::
 ::for( company in ctx.recipient.companies )::
-	::if( rand < .5 )::
-		::company.name::
-	::else::
-		None
-	::end::
+	**if( rand < .2 )**
+		**company.name.toLowerCase()**
+	**elseif( rand > .7 )**
+		**company.name.toUpperCase()**
+	**else**
+		**company.name**
+	**end**
 ::end::
 ```
 
@@ -32,10 +34,12 @@ You work in these companies : **ctx.recipient.companies.map( function( c ) retur
 Here are your companies :
 **pose var rand = Math.random()**
 **boucle( company in ctx.recipient.companies )**
-	**si( rand < .5 )**
-		**company.name**
+	**si( rand < .2 )**
+		**company.name.toLowerCase()**
+	**ou_si( rand > .7 )**
+		**company.name.toUpperCase()**
 	**sinon**
-		None
+		**company.name**
 	**fin**
 **fin**
 ```
@@ -65,15 +69,23 @@ s	+= "
 for( company in ctx.recipient.companies ){
 	s	+= "
 	";
-	if( rand < .5 ){
+	if( rand < .2 ){
 		s	+= "
 		";
-		s	+= company.name;
+		s	+= company.name.toLowerCase();
+		s	+= "
+	";
+	}else if( rand > .7 ){
+		s	+= "
+		";
+		s	+= company.name.toUpperCase();
 		s	+= "
 	";
 	}else{
 		s	+= "
-		None
+		";
+		s	+= company.name;
+		s	+= "
 	";
 	}
 	s	+= "
@@ -81,7 +93,7 @@ for( company in ctx.recipient.companies ){
 }
 return s;
 ```
-Here is a full example https://try.haxe.org/#34238fB1 :
+Here is a full example https://try.haxe.org/#EE2e6910 :
 ```haxe
 class Test {
 	static function main() {
@@ -91,17 +103,20 @@ class Test {
       Here are your companies :
       **pose var rand = Math.random()**
       **boucle( company in ctx.recipient.companies )**
-        **si( rand < .5 )**
-          **company.name**
-        **sinon**
-          None
-        **fin**
+        **si( rand < .2 )**
+		**company.name.toLowerCase()**
+	**ou_si( rand > .7 )**
+		**company.name.toUpperCase()**
+	**sinon**
+		**company.name**
+	**fin**
       **fin**";
 
           Template.PRETTY	= true;
           Template.SIGN	= "*";
           Template.DO	= "pose";
           Template.IF	= "si";
+	  Template.ELSEID= "si";
           Template.ELSE	= "sinon";
           Template.FOR	= "boucle";
           Template.END	= "fin";
