@@ -12,6 +12,7 @@ enum EToken{
 	EExpr( s : String );
 	EDo( s : String );
 	EIf( s : String );
+	EElseIf( s : String );
 	EElse;
 	EFor( s : String );
 	EEnd;
@@ -19,12 +20,13 @@ enum EToken{
  
 class Template {
 
-	public static var SIGN	= ":";
-	public static var IF	= "if";
-	public static var ELSE	= "else";
-	public static var FOR	= "for";
-	public static var END	= "end";
-	public static var DO	= "do";
+	public static var SIGN		= ":";
+	public static var IF		= "if";
+	public static var ELSE		= "else";
+	public static var ELSEIF	= "elseif";
+	public static var FOR		= "for";
+	public static var END		= "end";
+	public static var DO		= "do";
 
 	public static var PRETTY	= false;
 
@@ -68,6 +70,13 @@ class Template {
 								var next	= buf.charCodeAt( IF.length );
 								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "(".code ){
 									flow.push( EIf( buf.substr( IF.length ) ) );
+								}else{
+									flow.push( EExpr( buf ) );
+								}
+							}else if( buf.substr( 0, ELSEIF.length ).toLowerCase() == ELSEIF.toLowerCase() ){
+								var next	= buf.charCodeAt( ELSEIF.length );
+								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "(".code ){
+									flow.push( EElseIf( buf.substr( ELSEIF.length ) ) );
 								}else{
 									flow.push( EExpr( buf ) );
 								}
@@ -117,6 +126,10 @@ class Template {
 					writeOut( 's	+= $s;', tabs );
 				case EIf( s ) 	: 
 					writeOut( 'if$s{', tabs );
+					tabs++;
+				case EElseIf( s ) 	: 
+					tabs--;
+					writeOut( '}else if$s{', tabs );
 					tabs++;
 				case EFor( s ) 	: 
 					writeOut( 'for$s{', tabs );
