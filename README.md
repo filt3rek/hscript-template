@@ -113,20 +113,20 @@ class Test {
 
 For example if the template has an error like that :
 ```
-Hello "::ctx.recipient.name::", your main company is : ::ctx.recipient.companies[ 0 ].name::
-::if( !ctx.recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
-You work in these companies : ::ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )::
-Here are your companies :
-::do var rand = Math.rand()::
-::for( company in ctx.recipient.companies )::
-	::if( rand < .2 )::
-		::company.name.toLowerCase()::
-	::elseif(() rand > .7 )::
-		::company.name.toUpperCase()::
-	::else::
-		::company.name::
-	::end::
-::end::
+1.  Hello "::ctx.recipient.name::", your main company is : ::ctx.recipient.companies[ 0 ].name::
+2.  ::if( !ctx.recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
+3.  You work in these companies : ::ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )::
+4.  Here are your companies :
+5.  ::do var rand = Math.rand()::
+6.  ::for( company in ctx.recipient.companies )::
+7.  	::if( rand < .2 )::
+8.  		::company.name.toLowerCase()::
+9.  	::elseif(() rand > .7 )::
+10.  		::company.name.toUpperCase()::
+11.  	::else::
+12.  		::company.name::
+13.  	::end::
+14.  ::end::
 ```
 So you can catch errors like that :
 ```haxe
