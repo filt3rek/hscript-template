@@ -112,11 +112,11 @@ class Test {
 	**fin**
       **fin**";
 
-          Template.PRETTY	= true;
+          Template.PRETTY= true;
           Template.SIGN	= "*";
           Template.DO	= "pose";
           Template.IF	= "si";
-	  Template.ELSEID= "si";
+	  Template.ELSEIF= "ou_si";
           Template.ELSE	= "sinon";
           Template.FOR	= "boucle";
           Template.END	= "fin";
