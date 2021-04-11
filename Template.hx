@@ -54,10 +54,9 @@ class Template {
 		while( true ){
 			if( !iter.hasNext() ) break;
 			var c	= String.fromCharCode( iter.next().value );
-			var c2	= null;
 			if( c == SIGN ){
 				if( !iter.hasNext() ) break;
-				c2	= String.fromCharCode( iter.next().value );
+				var c2	= String.fromCharCode( iter.next().value );
 				if( c2 == SIGN ){
 					if( insideExpr ){
 						if( buf == ELSE ){
