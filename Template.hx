@@ -28,8 +28,6 @@ class Template {
 	public static var END		= "end";
 	public static var DO		= "do";
 
-	public static var PRETTY	= false;
-
 	public var flow	: Array<EToken>;
 	public var out	: String;		
 	
@@ -56,9 +54,10 @@ class Template {
 		while( true ){
 			if( !iter.hasNext() ) break;
 			var c	= String.fromCharCode( iter.next().value );
+			var c2	= null;
 			if( c == SIGN ){
 				if( !iter.hasNext() ) break;
-				var c2	= String.fromCharCode( iter.next().value );
+				c2	= String.fromCharCode( iter.next().value );
 				if( c2 == SIGN ){
 					if( insideExpr ){
 						if( buf == ELSE ){
@@ -105,60 +104,36 @@ class Template {
 					}
 					buf = "";
 				}else{
-					buf += c;
+					buf += c + c2;
 				}
 			}else{
 				buf += c;
 			}
 		}
 		
-		var tabs	= 0;
-		out			= 'var s	= "";';
-		if( PRETTY ){
-			out	+= "\r\n";
-		}
+		out			= 'var s="";';
 		for( token in flow ){
 			switch token {
 				case EText( s ) :
 					s	= s.split( '"' ).join( '\\"' );
-					writeOut( 's	+= "$s";', tabs );
+					out += 's+="$s";';
 				case EExpr( s ) : 
-					writeOut( 's	+= $s;', tabs );
+					out += 's+=$s;';
 				case EIf( s ) 	: 
-					writeOut( 'if$s{', tabs );
-					tabs++;
+					out += 'if$s{';
 				case EElseIf( s ) 	: 
-					tabs--;
-					writeOut( '}else if$s{', tabs );
-					tabs++;
+					out += '}else if$s{';
 				case EFor( s ) 	: 
-					writeOut( 'for$s{', tabs );
-					tabs++;
+					out += 'for$s{';
 				case EDo( s ) 	: 
-					writeOut( '$s;', tabs );
+					out += '$s;';
 				case EElse		: 
-					tabs--;
-					writeOut( '}else{', tabs );
-					tabs++;
+					out += '}else{';
 				case EEnd		 : 
-					tabs--;
-					writeOut( '}', tabs );
+					out += '}';
 				case _ :
 			}
 		}
 		out	+= "return s;";
-	}
-	
-	inline function writeOut( s : String, tabs : Int ){
-		if( PRETTY ){
-			for( i in 0...tabs ){
-				out	+= "\t";
-			}
-		}
-		out	+= s;
-		if( PRETTY ){
-			out	+= "\r\n";
-		}
-
 	}
 }
