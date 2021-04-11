@@ -26,7 +26,7 @@ Here are your companies :
 ```
 
 You can also customize the sign used to delimitate expressions and the keywords as if, else, for, end and do.
-So now you can wrtie templates like that (like in the awful WINDEV :rofl: ) :
+So now you can wrtie templates like that (like in the awful WINDEV-FR :rofl: ) :
 ```
 Hello "**ctx.recipient.name**", your main company is : **ctx.recipient.companies[ 0 ].name**
 **si( !ctx.recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
