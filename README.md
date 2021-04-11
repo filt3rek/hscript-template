@@ -3,7 +3,7 @@ Little run-time template system based on hscript
 
 A little class that “generates” a “haxe source” which you can use with hscript to get a run-time template system.
 It can be improved of course but I stop here for now I get all for my needs.
-The synthax is almost the same as in tink_template and it supports expressions output, if, else, for statements and “do”.
+The synthax is almost the same as in tink_template and it supports expressions output, if, else, elseif, for statements and “do”.
 I didn’t wrote any error handling because hscript does that.
 This class could directly generate hscript AST expressions, but I’ve done that quickly, I have no time to look deeper into hscript for now.
 
