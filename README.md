@@ -4,7 +4,7 @@ Little run-time template system based on hscript
 A little class that “generates” a “haxe source” which you can use with hscript to get a run-time template system.
 It can be improved of course but I stop here for now I get all for my needs.
 The synthax is almost the same as in tink_template and it supports expressions output, if, else, elseif, for statements and “do”.
-I didn’t wrote any error handling because hscript does that.
+I didn’t wrote any error handling because hscript does that but you can see how catch errors at the end of this document.
 This class could directly generate hscript AST expressions, but I’ve done that quickly, I have no time to look deeper into hscript for now.
 
 Here is an example of a working template :
@@ -15,13 +15,13 @@ You work in these companies : ::ctx.recipient.companies.map( function( c ) retur
 Here are your companies :
 ::do var rand = Math.rand()::
 ::for( company in ctx.recipient.companies )::
-	**if( rand < .2 )**
-		**company.name.toLowerCase()**
-	**elseif( rand > .7 )**
-		**company.name.toUpperCase()**
-	**else**
-		**company.name**
-	**end**
+	::if( rand < .2 )::
+		::company.name.toLowerCase()::
+	::elseif( rand > .7 )::
+		::company.name.toUpperCase()::
+	::else::
+		::company.name::
+	::end::
 ::end::
 ```
 
@@ -43,57 +43,25 @@ Here are your companies :
 	**fin**
 **fin**
 ```
-And get a pretty output if you want debug maybe. So this is the result you get and give to eat to hscript : 
+This is the result you get and give to eat to hscript : 
 ```haxe
-var s	= "";
-s	+= "Hello \"";
-s	+= ctx.recipient.name;
-s	+= "\", your main company is : ";
-s	+= ctx.recipient.companies[ 0 ].name;
-s	+= "
-";
-if( !ctx.recipient.male ){
-	s	+= "Bonjour Madame !";
-}else{
-	s	+= "Bonjour Monsieur !";
-}
-s	+= "
-You work in these companies : ";
-s	+= ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' );
-s	+= "
+var s="";s+="Hello \"";s+=ctx.recipient.name;s+="\", your main company is : ";s+=ctx.recipient.companies[ 0 ].name;s+="
+";if( !ctx.recipient.male ){s+="Bonjour Madame !";}else{s+="Bonjour Monsieur !";}s+="
+You work in these companies : ";s+=ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' );s+="
 Here are your companies :
-";
-var rand = Math.random();
-s	+= "
-";
-for( company in ctx.recipient.companies ){
-	s	+= "
-	";
-	if( rand < .2 ){
-		s	+= "
-		";
-		s	+= company.name.toLowerCase();
-		s	+= "
-	";
-	}else if( rand > .7 ){
-		s	+= "
-		";
-		s	+= company.name.toUpperCase();
-		s	+= "
-	";
-	}else{
-		s	+= "
-		";
-		s	+= company.name;
-		s	+= "
-	";
-	}
-	s	+= "
-";
-}
-return s;
+";var rand = Math.rand();s+="
+";for( company in ctx.recipient.companies ){s+="
+	";if( rand < .2 ){s+="
+		";s+=company.name.toLowerCase();s+="
+	";}else if(() rand > .7 ){s+="
+		";s+=company.name.toUpperCase();s+="
+	";}else{s+="
+		";s+=company.name;s+="
+	";}s+="
+";}return s;
 ```
-Here is a full example https://try.haxe.org/#EE2e6910 :
+At the begining I've written a "pretty" mode to output with indents and newlines but I don't see the need at the end so I removed that.
+Here is a full example https://try.haxe.org/#B3eE1d01 :
 ```haxe
 class Test {
 	static function main() {
@@ -112,7 +80,6 @@ class Test {
 	**fin**
       **fin**";
 
-          Template.PRETTY	= true;
           Template.SIGN		= "*";
           Template.DO		= "pose";
           Template.IF		= "si";
@@ -141,6 +108,44 @@ class Test {
           trace( ret );
 	}
 }
-
-
 ```
+## Error handling
+
+For example if the template has an error like that :
+```
+Hello "::ctx.recipient.name::", your main company is : ::ctx.recipient.companies[ 0 ].name::
+::if( !ctx.recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
+You work in these companies : ::ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )::
+Here are your companies :
+::do var rand = Math.rand()::
+::for( company in ctx.recipient.companies )::
+	::if( rand < .2 )::
+		::company.name.toLowerCase()::
+	::elseif(() rand > .7 )::
+		::company.name.toUpperCase()::
+	::else::
+		::company.name::
+	::end::
+::end::
+```
+So you can catch errors like that :
+```haxe
+try{
+	var parser	= new hscript.Parser();
+	var ast 	= parser.parseString( tpl.out );
+	var interp 	= new hscript.Interp();
+	interp.variables.set( "ctx", ctx );
+	interp.variables.set( "Math", Math );
+	var ret		=  interp.execute( ast );
+	trace( ret );
+}catch( e : hscript.Expr.Error ){
+	var lines	= s.split( "\n" );
+	trace( "HScript parser error " + e + " : " + StringTools.trim( lines[ e.line - 1 ] ) );
+	for( i in 0...lines.length ){
+		trace( i + 1, lines[ i ] );
+	}
+}catch( e ){
+	trace( "HScript interpreter : " + e.message );
+}
+```
+Note that hscript gives the line number starting from 1, so you have to decrement to get the array index of the template sources splitted by newlines `\n`
