@@ -1,5 +1,5 @@
 # hscript-template
-Little run-time template system based on hscript
+Little run-time template system based on https://github.com/HaxeFoundation/hscript
 
 A little class that “generates” a “haxe source” which you can use with hscript to get a run-time template system.
 It can be improved of course but I stop here for now I get all for my needs.
