@@ -7,7 +7,7 @@ package ftk.format;
 
 using StringTools;
 
-enum EToken{
+enum ETemplateToken{
 	EText( s : String );
 	EExpr( s : String );
 	EDo( s : String );
@@ -28,19 +28,20 @@ class Template {
 	public static var END		= "end";
 	public static var DO		= "do";
 
-	public var flow	: Array<EToken>;
-	public var out	: String;		
+	public var flow	: Array<ETemplateToken>;
+	public var out	: UnicodeString;		
 	
-	var buf	: String;
+	var buf	: UnicodeString;
 	
 	public function new() {}
 
-	public function parse( s : String ) {
+	public function parse( s : UnicodeString ) {
 		var iter	= null;
 #if ( haxe_ver >= 4 ) 
 		iter	= new haxe.iterators.StringKeyValueIteratorUnicode( s );
 #else
 		var a	= [];
+		var i	= 0;
 		var s	= haxe.Utf8.encode( s );
 		function f( n : Int ){
 			a.push( { key : i++, value : n } );
@@ -103,11 +104,14 @@ class Template {
 					}
 					buf = "";
 				}else{
-					buf += c + c2;
+					buf = buf + c + c2;
 				}
 			}else{
-				buf += c;
+				buf = buf + c;
 			}
+		}
+		if( buf != null ){
+			flow.push( EText( buf ) );
 		}
 		
 		out			= 'var s="";';
@@ -115,24 +119,24 @@ class Template {
 			switch token {
 				case EText( s ) :
 					s	= s.split( '"' ).join( '\\"' );
-					out += 's+="$s";';
+					out = out + 's+="$s";';
 				case EExpr( s ) : 
-					out += 's+=$s;';
+					out = out + 's+=$s;';
 				case EIf( s ) 	: 
-					out += 'if$s{';
+					out = out + 'if$s{';
 				case EElseIf( s ) 	: 
-					out += '}else if$s{';
+					out = out + '}else if$s{';
 				case EFor( s ) 	: 
-					out += 'for$s{';
+					out = out + 'for$s{';
 				case EDo( s ) 	: 
-					out += '$s;';
+					out = out + '$s;';
 				case EElse		: 
-					out += '}else{';
+					out = out + '}else{';
 				case EEnd		 : 
-					out += '}';
+					out = out + '}';
 				case _ :
 			}
 		}
-		out	+= "return s;";
+		out	= out + "return s;";
 	}
 }
