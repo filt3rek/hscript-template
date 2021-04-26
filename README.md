@@ -155,7 +155,7 @@ Note that hscript gives the line number starting from 1, so you have to decremen
 
 ## Compile-time
 
-I'll used tink_template until today. Tink_template is really a good lib, Juraj is really a good coder and I thank him for all his work but Tink has a lot of dependencies and I don't really like that, so I turned this little class that was first written to work on run-time, to work now on compile-time.
+I've used tink_template until today. Tink_template is really a good lib, Juraj is an awesome coder and I thank him for all his work but Tink has a lot of dependencies and I don't really like that, so I turned this little class that was first written to work on run-time, to work now on compile-time.
 
 BTW, this class with hscript runs faster that tink_template 😲
 
