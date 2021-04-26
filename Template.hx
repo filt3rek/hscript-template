@@ -215,6 +215,7 @@ class Template {
 			tpl.parse( content );
 
 		var parser	= new hscript.Parser();
+			parser.identChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_$";	// $ added in order to get i.e. record-macros working
 		var ast 	= try{
 			parser.parseString( tpl.out );
 		}catch( #if hscriptPos e : hscript.Expr.Error #else e #end ){
