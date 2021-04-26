@@ -168,10 +168,11 @@ class Template {
 		out	= out + "return __s__;";
 	}
 
-	/*	Compile-time templates
-	*
+	//	Compile-time templates
+	
+	/*  Manual build function
 	*	Usage : @:template( "my/path" ) public function myFunction( arg1, arg2... ){
-	*		ftk.format.Template.build( arg1, arg2... );
+	*		ftk.format.Template.build();
 	*	}
 	*/
 
@@ -227,6 +228,14 @@ class Template {
 	}
 
 #if macro
+
+	/*  Automatic build 
+	*	Usage : 
+	* 	Add `--macro ftk.format.Template.buildTemplates()` into build file
+	*	And `-D hscriptPos` to report error positions
+	*	
+	*	@:template( "my/path" ) public function myFunction( arg1, arg2... );
+	*/
 
 	public static function buildTemplates(){
 		haxe.macro.Compiler.addGlobalMetadata( "", "@:build( ftk.format.Template._build() )" );
