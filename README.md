@@ -5,8 +5,6 @@ A little class that “generates” a “haxe source” which you can use with h
 It can be improved of course but I stop here for now I get all for my needs.
 The synthax is almost the same as in tink_template and it supports expressions output, if, else, elseif, switch/case, for statements “do” and comments.
 I didn’t wrote any error handling because hscript does that but you can see how catch errors at the end of this document.
-~~This class could directly generate hscript AST expressions, but I’ve done that quickly, I have no time to look deeper into hscript for now.~~
-It does play directly with ast when generating compile-time templates.
 
 Here is an example of a working template :
 ```
