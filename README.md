@@ -1,11 +1,12 @@
 # hscript-template
-Little run-time template system based on https://github.com/HaxeFoundation/hscript
+Little run-time and compile-time template system based on https://github.com/HaxeFoundation/hscript
 
-A little class that “generates” a “haxe source” which you can use with hscript to get a run-time template system.
+A little class that “generates” a “haxe source” which you can use with hscript to get a template system working like tink_template.
 It can be improved of course but I stop here for now I get all for my needs.
-The synthax is almost the same as in tink_template and it supports expressions output, if, else, elseif, for statements and “do”.
+The synthax is almost the same as in tink_template and it supports expressions output, if, else, elseif, switch/case, for statements “do” and comments.
 I didn’t wrote any error handling because hscript does that but you can see how catch errors at the end of this document.
-This class could directly generate hscript AST expressions, but I’ve done that quickly, I have no time to look deeper into hscript for now.
+~~This class could directly generate hscript AST expressions, but I’ve done that quickly, I have no time to look deeper into hscript for now.~~
+It does play directly with ast when generating compile-time templates.
 
 Here is an example of a working template :
 ```
@@ -151,3 +152,23 @@ try{
 And you will see `HScript parser error hscript:9: Unexpected token: ")" : ::elseif(() rand > .7 )::`
 
 Note that hscript gives the line number starting from 1, so you have to decrement to get the array index of the template sources splitted by newlines `\n`
+
+## Compile-time
+
+I'll used tink_template until today. Tink_template is really a good lib, Juraj is really a good coder and I thank him for all his work but Tink has a lot of dependencies and I don't really like that, so I turned this little class that was first written to work on run-time, to work now on compile-time.
+
+BTW, this class with hscript runs faster that tink_template :rofl:
+
+You must add that to your build file : 
+```
+--macro ftk.format.Template.buildTemplates()
+# And if you want to get template error position :
+-D hscriptPos
+```
+Then the render function is the same as in tink_template, for example :
+```haxe
+@:template( "tpl/myTemplate.mtt" ) public function render();
+```
+The source file path is relative to the class file. Extension isn't important.
+
+Note : the reported error position is a little buggy, I'll try to fix that when I'll have time.
