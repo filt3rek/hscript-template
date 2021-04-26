@@ -205,8 +205,8 @@ class Template {
 				null;
 		}
 
-		var file	= haxe.macro.Context.getPosInfos( cl.pos ).file;
-		var p		= new haxe.io.Path( file );
+		var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
+		var p		= new haxe.io.Path( clFile );
 		var path	= p.dir + "/" + spath;
 		
 		var content	= sys.io.File.getContent( path );
@@ -244,23 +244,16 @@ class Template {
 	static function _build() : Array<haxe.macro.Expr.Field> {
 		var fields	= haxe.macro.Context.getBuildFields();
 		for( field in fields ){
-			for ( meta in field.meta ){
-				if( meta.name == ":template" ){
-					var cl	= haxe.macro.Context.getLocalClass().get();
-					var pos	= field.pos;
-					switch field.kind{
-						case FFun(f):
-							field.access.push( haxe.macro.Expr.Access.AInline );
-							var args	= f.args;
-							if( f.expr == null ){
-								var a	= [
-									macro ftk.format.Template.build()
-								];
-								f.expr	= macro $b{ a };
+			switch field.kind{
+				case FFun(f):
+					if( f.expr == null ){
+						for( meta in field.meta ){
+							if( meta.name == ":template" ){
+								f.expr	= macro $b{ [ macro ftk.format.Template.build() ] };
 							}
-						case _ :
+						}
 					}
-				}
+				case _ :
 			}
 		}
 		return fields;
