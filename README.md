@@ -61,9 +61,10 @@ Here are your companies :
 	";}s+="
 ";}return s;
 ```
+At the begining I've written a "pretty" mode to output with indents and newlines but I don't see the need at the end so I removed that.
+
 ## Run-time
 
-At the begining I've written a "pretty" mode to output with indents and newlines but I don't see the need at the end so I removed that.
 Here is a full example https://try.haxe.org/#B3eE1d01 :
 ```haxe
 class Test {
