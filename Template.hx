@@ -216,9 +216,11 @@ class Template {
 		var parser	= new hscript.Parser();
 		var ast 	= try{
 			parser.parseString( tpl.out );
-		}catch( e : hscript.Expr.Error ){
+		}catch( #if hscriptPos e : hscript.Expr.Error #else e #end ){
+			#if hscriptPos
 			var pos	= haxe.macro.PositionTools.make( { file : path, min : e.pmin, max : e.pmax } );
-			haxe.macro.Context.fatalError( e.toString(), pos  );
+			#end
+			haxe.macro.Context.fatalError( #if hscriptPos e.toString()#else e.message #end, pos  );
 		}
 
 		return new hscript.Macro( pos ).convert( ast );
