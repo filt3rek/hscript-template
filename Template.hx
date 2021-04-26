@@ -15,6 +15,8 @@ enum ETemplateToken{
 	EElseIf( s : String );
 	EElse;
 	EFor( s : String );
+	ESwitch( s : String );
+	ECase( s : String );
 	EEnd;
 }
  
@@ -25,6 +27,8 @@ class Template {
 	public static var ELSE		= "else";
 	public static var ELSEIF	= "elseif";
 	public static var FOR		= "for";
+	public static var SWITCH	= "switch";
+	public static var CASE		= "case";
 	public static var END		= "end";
 	public static var DO		= "do";
 
@@ -51,7 +55,8 @@ class Template {
 #end
 		flow	= [];
 		buf 	= "";
-		var insideExpr	= false;
+		var insideExpr		= false;
+		var writeText		= true;
 		while( true ){
 			if( !iter.hasNext() ) break;
 			var c	= String.fromCharCode( iter.next().value );
@@ -86,6 +91,22 @@ class Template {
 								}else{
 									flow.push( EExpr( buf ) );
 								}
+							}else if( buf.substr( 0, SWITCH.length ).toLowerCase() == SWITCH.toLowerCase() ){
+								var next	= buf.charCodeAt( SWITCH.length );
+								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "(".code ){
+									flow.push( ESwitch( buf.substr( SWITCH.length ) ) );
+									writeText		= false;
+								}else{
+									flow.push( EExpr( buf ) );
+								}
+							}else if( buf.substr( 0, CASE.length ).toLowerCase() == CASE.toLowerCase() ){
+								var next	= buf.charCodeAt( CASE.length );
+								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "(".code ){
+									flow.push( ECase( buf.substr( CASE.length ) ) );
+									writeText	= true;
+								}else{
+									flow.push( EExpr( buf ) );
+								}
 							}else if( buf.substr( 0, DO.length ).toLowerCase() == DO.toLowerCase() ){
 								var next	= buf.charCodeAt( DO.length );
 								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "{".code ){
@@ -99,7 +120,9 @@ class Template {
 						}
 						insideExpr	= false;
 					}else{
-						flow.push( EText( buf ) );
+						if( writeText ){
+							flow.push( EText( buf ) );
+						}
 						insideExpr 	= true;
 					}
 					buf = "";
@@ -114,29 +137,124 @@ class Template {
 			flow.push( EText( buf ) );
 		}
 		
-		out			= 'var s="";';
+		out			= 'var __s__="";';
 		for( token in flow ){
 			switch token {
 				case EText( s ) :
 					s	= s.split( '"' ).join( '\\"' );
-					out = out + 's+="$s";';
+					out = out + '__s__+="$s";';
 				case EExpr( s ) : 
-					out = out + 's+=$s;';
+					if( s.startsWith( "*" ) && s.endsWith( "*" ) ) continue;	// Comments
+					out = out + '__s__+=$s;';
 				case EIf( s ) 	: 
-					out = out + 'if$s{';
+					out = out + 'if($s){';
 				case EElseIf( s ) 	: 
-					out = out + '}else if$s{';
+					out = out + '}else if($s){';
 				case EFor( s ) 	: 
-					out = out + 'for$s{';
+					out = out + 'for($s){';
 				case EDo( s ) 	: 
 					out = out + '$s;';
 				case EElse		: 
 					out = out + '}else{';
+				case ESwitch( s )		: 
+					out = out + 'switch($s){';
+				case ECase( s )		: 
+					out = out + 'case $s :';
 				case EEnd		 : 
 					out = out + '}';
 				case _ :
 			}
 		}
-		out	= out + "return s;";
+		out	= out + "return __s__;";
 	}
+
+	/*	Compile-time templates
+	*
+	*	Usage : @:template( "my/path" ) public function myFunction( arg1, arg2... ){
+	*		ftk.format.Template.build( arg1, arg2... );
+	*	}
+	*/
+
+	macro public static function build() {
+#if display
+		return;
+#end
+		var pos		= haxe.macro.Context.currentPos();
+
+		var lcl		= haxe.macro.Context.getLocalClass();
+		var smethod	= haxe.macro.Context.getLocalMethod();
+		var cl		= lcl.get();
+		var method	= null;
+		for( field in cl.statics.get().concat( cl.fields.get() ) ){
+			if( field.name == smethod ){
+				method	= field;
+				break;
+			}
+		}
+		
+		var meta	= method.meta.extract( ":template" )[ 0 ];
+		if( meta == null ){
+			haxe.macro.Context.fatalError( "Template meta not found. @:template( \"my/path\" ) needed", pos  );
+		}
+
+		var spath	= switch meta.params[ 0 ].expr {
+			case EConst( CString( s ) )	: s;
+			case _						: 
+				haxe.macro.Context.fatalError( "Invalid meta, String path needed", pos  );
+				null;
+		}
+
+		var file	= haxe.macro.Context.getPosInfos( cl.pos ).file;
+		var p		= new haxe.io.Path( file );
+		var path	= p.dir + "/" + spath;
+		
+		var content	= sys.io.File.getContent( path );
+
+		var tpl	= new ftk.format.Template();
+			tpl.parse( content );
+
+		var parser	= new hscript.Parser();
+		var ast 	= try{
+			parser.parseString( tpl.out );
+		}catch( e : hscript.Expr.Error ){
+			var pos	= haxe.macro.PositionTools.make( { file : path, min : e.pmin, max : e.pmax } );
+			haxe.macro.Context.fatalError( e.toString(), pos  );
+		}
+
+		return new hscript.Macro( pos ).convert( ast );
+	}
+
+#if macro
+
+	public static function buildTemplates(){
+		haxe.macro.Compiler.addGlobalMetadata( "", "@:build( ftk.format.Template._build() )" );
+	}
+
+	static function _build() : Array<haxe.macro.Expr.Field> {
+		var fields	= haxe.macro.Context.getBuildFields();
+		for( field in fields ){
+			for ( meta in field.meta ){
+				if( meta.name == ":template" ){
+					var cl	= haxe.macro.Context.getLocalClass().get();
+					var pos	= field.pos;
+					switch field.kind{
+						case FFun(f):
+							field.access.push( haxe.macro.Expr.Access.AInline );
+							var args	= f.args;
+							if( f.expr == null ){
+								var a	= [
+									macro ftk.format.Template.build()
+								];
+								f.expr	= macro $b{ a };
+							}
+						case _ :
+					}
+				}
+			}
+		}
+		return fields;
+	}
+
+#end
+
 }
