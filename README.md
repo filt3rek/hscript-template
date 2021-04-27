@@ -147,6 +147,8 @@ try{
 	trace( "HScript interpreter : " + e.message );
 }
 ```
+You have to add `-D hscriptPos`to your build file in order to get error position
+
 And you will see `HScript parser error hscript:9: Unexpected token: ")" : ::elseif(() rand > .7 )::`
 
 Note that hscript gives the line number starting from 1, so you have to decrement to get the array index of the template sources splitted by newlines `\n`
