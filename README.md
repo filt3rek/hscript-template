@@ -1,7 +1,7 @@
 # hscript-template
 Little run-time and compile-time template system based on https://github.com/HaxeFoundation/hscript
 
-A little class that “generates” a “haxe source” which you can use with hscript to get a template system working like tink_template.
+A little class that “generates” a “haxe source” which you can use with hscript to get a template system working like https://github.com/haxetink/tink_template.
 It can be improved of course but I stop here for now I get all for my needs.
 The synthax is almost the same as in tink_template and it supports expressions output, if, else, elseif, switch/case, for statements “do” and comments.
 I didn’t wrote any error handling because hscript does that but you can see how catch errors at the end of this document.
