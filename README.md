@@ -143,9 +143,6 @@ try{
 }catch( e : hscript.Expr.Error ){
 	var lines	= s.split( "\n" );
 	trace( "HScript parser error " + e + " : " + StringTools.trim( lines[ e.line - 1 ] ) );
-	for( i in 0...lines.length ){
-		trace( i + 1, lines[ i ] );
-	}
 }catch( e ){
 	trace( "HScript interpreter : " + e.message );
 }
@@ -171,3 +168,14 @@ Then the render function is the same as in tink_template, for example :
 @:template( "tpl/myTemplate.mtt" ) public function render();
 ```
 The source file path is relative to the class file. Extension isn't important.
+
+## How does it work ?
+
+All the template is turned into a string concatenation. The basic text (or html) is concatened into text and all the expressions are just evaluated and then concatened into this same string, as you can see in the examples above.
+
+### "Do" statement
+
+With the "do" statement, you can do everything you want.
+Since all the expressions are just evaluated, you can write any Haxe valid expression like let variables, functions and everything that can be evaluated at the place the template is rendered.
+
+On compile-time, the template is rendered so you get a string concatenation that is "injected" in the body of the function. This function just returns this string with the basic text and all the evaluated expressions...
