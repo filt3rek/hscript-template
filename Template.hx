@@ -144,8 +144,11 @@ class Template {
 					s	= s.split( '"' ).join( '\\"' );
 					out = out + '__s__+="$s";';
 				case EExpr( s ) : 
-					if( s.startsWith( "*" ) && s.endsWith( "*" ) ) continue;	// Comments
-					out = out + '__s__+=$s;';
+					if( s.startsWith( "*" ) && s.endsWith( "*" ) ){
+						out = out + '/*__s__+=$s;*/';
+					}else{
+						out = out + '__s__+=$s;';
+					}
 				case EIf( s ) 	: 
 					out = out + 'if($s){';
 				case EElseIf( s ) 	: 
@@ -159,7 +162,7 @@ class Template {
 				case ESwitch( s )		: 
 					out = out + 'switch($s){';
 				case ECase( s )		: 
-					out = out + 'case $s :';
+					out = out + 'case $s:';
 				case EEnd		 : 
 					out = out + '}';
 				case _ :
@@ -209,22 +212,34 @@ class Template {
 		var p		= new haxe.io.Path( clFile );
 		var path	= p.dir + "/" + spath;
 		
-		var content	= sys.io.File.getContent( path );
+		var content = sys.io.File.getContent( path );
 
 		var tpl	= new ftk.format.Template();
 			tpl.parse( content );
 
 		var parser	= new hscript.Parser();
 			parser.identChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_$";	// $ added in order to get i.e. record-macros working
-		var ast 	= try{
-			parser.parseString( tpl.out );
-		}catch( #if hscriptPos e : hscript.Expr.Error #else e #end ){
-			#if hscriptPos
-			var pos	= haxe.macro.PositionTools.make( { file : path, min : e.pmin, max : e.pmax } );
-			#end
-			haxe.macro.Context.fatalError( #if hscriptPos e.toString()#else e.message #end, pos  );
+		var ast 	= null;
+		try{
+			ast	= parser.parseString( tpl.out );
 		}
-
+		#if hscriptPos
+		catch( e : hscript.Expr.Error ){
+			var a		= content.split( "\n" );
+			var offset	= 0;
+			for( i in 0...( e.line - 1 ) ){
+				var line	= a[ i ];
+				offset		+= line.length + 1;
+			}
+			var pos	= haxe.macro.Context.makePosition( { file : path, min : offset, max : offset } );
+			haxe.macro.Context.fatalError( e.toString(), pos  );
+		}
+		#end
+		catch( e ){
+			var pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+			haxe.macro.Context.fatalError( e.message, pos );
+		}
+		
 		return new hscript.Macro( pos ).convert( ast );
 	}
 
@@ -250,7 +265,7 @@ class Template {
 					if( f.expr == null ){
 						for( meta in field.meta ){
 							if( meta.name == ":template" ){
-								f.expr	= macro $b{ [ macro ftk.format.Template.build() ] };
+								f.expr	= macro @:pos( field.pos ) ftk.format.Template.build();		
 							}
 						}
 					}
