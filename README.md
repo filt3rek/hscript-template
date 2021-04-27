@@ -171,5 +171,3 @@ Then the render function is the same as in tink_template, for example :
 @:template( "tpl/myTemplate.mtt" ) public function render();
 ```
 The source file path is relative to the class file. Extension isn't important.
-
-Note : the reported error position is a little buggy, I'll try to fix that when I'll have time.
