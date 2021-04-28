@@ -18,6 +18,10 @@ class TemplateError {
 		this.line		= e.line;
 		this.message	= message;
 	}
+
+	public function toString(){
+		return 'Line $line : $message';
+	}
 }
 #end
 
