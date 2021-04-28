@@ -178,8 +178,6 @@ So you can mix some manipulations and the resulting template.
 Because by default *hscript* doesn't manage string interpolation even in macro mode, another work is needed to get string interpolation working (only in compile-time). For that by default the token `$` is used. But if you use the `$` sign somewhere in your template that has nothing to do with string interpolation, i.e. some javascript scripts use the `$` sign as variables names, you have to specify another token for the real string interpolation token like that :
 ```
 --macro ftk.format.Template.buildTemplates( "$$" )
-# And if you want to get template error position :
--D hscriptPos
 ```
 And this will be correctly interpolated:
 ```haxe
