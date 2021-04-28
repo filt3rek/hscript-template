@@ -7,6 +7,20 @@ package ftk.format;
 
 using StringTools;
 
+#if hscriptPos
+class TemplateError {
+	public var line		(default,null)	: Int;
+	public var message	(default,null)	: String;
+	public var native	(default,null)	: hscript.Expr.Error;
+
+	public function new( e : hscript.Expr.Error, message : String ){
+		this.native		= e;
+		this.line		= e.line;
+		this.message	= message;
+	}
+}
+#end
+
 enum ETemplateToken{
 	EText( s : String );
 	EExpr( s : String );
@@ -22,37 +36,32 @@ enum ETemplateToken{
  
 class Template {
 
-	public static var SIGN		= ":";
-	public static var IF		= "if";
-	public static var ELSE		= "else";
-	public static var ELSEIF	= "elseif";
-	public static var FOR		= "for";
-	public static var SWITCH	= "switch";
-	public static var CASE		= "case";
-	public static var END		= "end";
-	public static var DO		= "do";
+#if macro
+	static var stringInterpolationToken	= "$";
+#end
+
+	public var SIGN		= ":";
+	public var IF		= "if";
+	public var ELSE		= "else";
+	public var ELSEIF	= "elseif";
+	public var FOR		= "for";
+	public var SWITCH	= "switch";
+	public var CASE		= "case";
+	public var END		= "end";
+	public var DO		= "do";
 
 	public var flow	: Array<ETemplateToken>;
 	public var out	: UnicodeString;		
 	
+	var str	: String;
 	var buf	: UnicodeString;
 	
 	public function new() {}
 
 	public function parse( s : UnicodeString ) {
-		var iter	= null;
-#if ( haxe_ver >= 4 ) 
-		iter	= new haxe.iterators.StringKeyValueIteratorUnicode( s );
-#else
-		var a	= [];
-		var i	= 0;
-		var s	= haxe.Utf8.encode( s );
-		function f( n : Int ){
-			a.push( { key : i++, value : n } );
-		}
-		haxe.Utf8.iter( s, f );
-		iter	= a.iterator();
-#end
+		var iter	= new haxe.iterators.StringKeyValueIteratorUnicode( s );
+
+		str		= s;
 		flow	= [];
 		buf 	= "";
 		var insideExpr		= false;
@@ -169,6 +178,26 @@ class Template {
 			}
 		}
 		out	= out + "return __s__;";
+		return out;
+	}
+
+	public function execute( ctx : {} ){
+		try{
+			var parser	= new hscript.Parser();
+			var ast 	= parser.parseString( out );
+			var interp 	= new hscript.Interp();
+			for( field in Reflect.fields( ctx ) ){
+				interp.variables.set( field, Reflect.field( ctx, field ) );
+			}
+			var ret		: String =  interp.execute( ast );
+			return ret;
+		}
+		#if hscriptPos
+		catch( e : hscript.Expr.Error ){
+			var lines	= str.split( "\n" );
+			throw new TemplateError( e, hscript.Printer.errorToString( e ) + " : " + lines[ e.line - 1 ].trim() );
+		}
+		#end
 	}
 
 	//	Compile-time templates
@@ -179,7 +208,7 @@ class Template {
 	*	}
 	*/
 
-	macro public static function build() {
+	macro public static function build( ?stringInterpolationToken : String ) {
 #if display
 		return;
 #end
@@ -240,10 +269,32 @@ class Template {
 			haxe.macro.Context.fatalError( e.message, pos );
 		}
 		
-		return new hscript.Macro( pos ).convert( ast );
+		var e	= new hscript.Macro( pos ).convert( ast );
+		// Check String Interpolations
+		switch e.expr{
+			case EBlock(a)	:
+				for( ee in a ){
+					haxe.macro.ExprTools.iter( ee, checkStringInterpolation.bind( _, stringInterpolationToken ) );
+				}
+			case _ :
+		}
+		return e;
 	}
 
 #if macro
+
+	static function checkStringInterpolation( e : haxe.macro.Expr, ?stringInterpolationToken : String ){
+		if( stringInterpolationToken == null ) stringInterpolationToken = Template.stringInterpolationToken;
+		switch e.expr {
+			case EConst( CString( s ) )	:
+				if( s.indexOf( stringInterpolationToken ) != -1 ){
+					s		= s.split( stringInterpolationToken ).join( "$" );
+					e.expr	= haxe.macro.MacroStringTools.formatString(s, e.pos).expr;
+				}
+			case _ :
+				haxe.macro.ExprTools.iter( e, checkStringInterpolation.bind( _, stringInterpolationToken ) );
+		}
+	}
 
 	/*  Automatic build 
 	*	Usage : 
@@ -253,8 +304,11 @@ class Template {
 	*	@:template( "my/path" ) public function myFunction( arg1, arg2... );
 	*/
 
-	public static function buildTemplates(){
-		haxe.macro.Compiler.addGlobalMetadata( "", "@:build( ftk.format.Template._build() )" );
+	public static function buildTemplates( ?stringInterpolationToken : String ){
+		if( stringInterpolationToken != null ){
+			Template.stringInterpolationToken	= stringInterpolationToken;
+		}
+		haxe.macro.Compiler.addGlobalMetadata( "", '@:build( ftk.format.Template._build() )' );
 	}
 
 	static function _build() : Array<haxe.macro.Expr.Field> {
