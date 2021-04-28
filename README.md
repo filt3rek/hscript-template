@@ -69,7 +69,7 @@ Here are your companies :
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#40c5DE07 :
+Here is a full example https://try.haxe.org/#5Ca6a218 :
 ```haxe
 class Test {
 	static function main() {
@@ -139,7 +139,7 @@ With this code :
 try{
 	return tpl.execute( ctx );
 }catch( e : ftk.format.Template.TemplateError ){
-	trace( "Line " + e.line + " : " + e.message );
+	trace( e );
 }
 ```
 
