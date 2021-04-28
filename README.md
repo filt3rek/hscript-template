@@ -69,7 +69,7 @@ Here are your companies :
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#6F4E8f0f :
+Here is a full example https://try.haxe.org/#40c5DE07 :
 ```haxe
 class Test {
 	static function main() {
@@ -157,15 +157,22 @@ The easiest way to use it for compile-time is to add this to your build file :
 ```
 Then the render function is the same as in *tink_template*, for example :
 ```haxe
-@:template( "tpl/myTemplate.mtt" ) public function render( arg1, arg2... );
+@:template( "my/path/to/templateFile" ) public function render( arg1, arg2... );
 ```
-**Note** : *The source file path is relative to the class file. Extension isn't important.*
+**Note** : *The source file path is relative to the class file. Extension isn't important. You can also specify another template meta that will be used to detect template functions to generate. By default `@:template()` is used but if you want to use `cheese` just do that* :
+``` 
+--macro ftk.format.Template.buildTemplates( null, "cheese" )
+```
+So you'll have that as templates functions :
+```
+@:cheese( "my/path/to/templateFile" ) public function render( arg1, arg2... );
+```
 
 It will just parse your template file, convert it to a string concatenation, transform it into Haxe macro expressions and populate the body function with these macro expressions. So the result is a function that you can call anywhere and get the string concatenation.
 
 You can also use the macro `build` function manually like that :
 ```haxe
-@:template( "tpl/myTemplate.mtt" ) public function render( arg1, arg2... ){
+@:template( "my/path/to/templateFile" ) public function render( arg1, arg2... ){
 	var x	= "foo";
 	...
 	ftk.format.Template.build();
