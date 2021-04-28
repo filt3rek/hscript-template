@@ -69,7 +69,7 @@ Here are your companies :
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#33f430F4 :
+Here is a full example https://try.haxe.org/#FC461E42 :
 ```haxe
 class Test {
 	static function main() {
@@ -172,10 +172,10 @@ It will just parse your template file, convert it to a string concatenation, tra
 
 You can also use the macro `build` function manually like that :
 ```haxe
-@:template( "my/path/to/templateFile" ) public function render( arg1, arg2... ){
+public function render( arg1, arg2... ){
 	var x	= "foo";
 	...
-	ftk.format.Template.build();
+	ftk.format.Template.build( "my/path/to/templateFile" );
 }
 ```
 So you can mix some manipulations and the resulting template.
