@@ -7,7 +7,7 @@ package ftk.format;
 
 using StringTools;
 
-#if hscriptPos
+#if ( hscript && hscriptPos )
 class TemplateError {
 	public var line		(default,null)	: Int;
 	public var message	(default,null)	: String;
@@ -186,6 +186,7 @@ class Template {
 		return out;
 	}
 
+#if hscript
 	public function execute( ctx : {} ){
 		try{
 			var parser	= new hscript.Parser();
@@ -204,6 +205,7 @@ class Template {
 		}
 		#end
 	}
+#end
 
 	//	Compile-time templates
 	
@@ -215,6 +217,7 @@ class Template {
 	*	}
 	*/
 
+#if hscript
 	macro public static function build( path : String, ?stringInterpolationToken : String ) {
 #if display
 		return;
@@ -269,6 +272,7 @@ class Template {
 		}
 		return e;
 	}
+#end
 
 #if macro
 
