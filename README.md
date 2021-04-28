@@ -185,6 +185,7 @@ And this will be correctly interpolated:
 ::"foo$$n"::
 ```
 Here I use `$$` but you can specify what you want.
+
 **Note** : You don't need to use single quote `'`. All the strings that has `$$` inside it will be interpolated. That is in fact why you need to specify antoher string interpolation token if inside your template there is i.e. a javascript that use the `$` sign in the variable's name...
 
 ## How does it work ?
