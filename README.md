@@ -15,12 +15,12 @@ For compile-time I added another helper macro functions `build` and `buildTempla
 
 ## Example of a working template :
 ```
-Hello "::ctx.recipient.name::", your main company is : ::ctx.recipient.companies[ 0 ].name::
-::if( !ctx.recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
-You work in these companies : ::ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )::
+Hello "::recipient.name::", your main company is : ::recipient.companies[ 0 ].name::
+::if( !recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
+You work in these companies : ::recipient.companies.map( function( c ) return c.name ).join( ', ' )::
 Here are your companies :
 ::do var rand = Math.rand()::
-::for( company in ctx.recipient.companies )::
+::for( company in recipient.companies )::
 	::if( rand < .2 )::
 		::company.name.toLowerCase()::
 	::elseif( rand > .7 )::
@@ -33,12 +33,12 @@ Here are your companies :
 You can also customize the sign used to delimitate expressions and the keywords as if, else, for, end, switch, case and do.
 So now you can write templates like that (like in the awful WINDEV-FR :rofl: ) :
 ```
-Hello "**ctx.recipient.name**", your main company is : **ctx.recipient.companies[ 0 ].name**
-**si( !ctx.recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
-You work in these companies : **ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )**
+Hello "**recipient.name**", your main company is : **recipient.companies[ 0 ].name**
+**si( !recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
+You work in these companies : **recipient.companies.map( function( c ) return c.name ).join( ', ' )**
 Here are your companies :
 **pose var rand = Math.random()**
-**boucle( company in ctx.recipient.companies )**
+**boucle( company in recipient.companies )**
 	**si( rand < .2 )**
 		**company.name.toLowerCase()**
 	**ou_si( rand > .7 )**
@@ -50,12 +50,12 @@ Here are your companies :
 ```
 This is the result you get and give to eat to *hscript* : 
 ```haxe
-var __s__="";__s__+="Hello \"";__s__+=ctx.recipient.name;__s__+="\", your main company is : ";__s__+=ctx.recipient.companies[ 0 ].name;__s__+="
-";if(( !ctx.recipient.male )){__s__+="Bonjour Madame !";}else{__s__+="Bonjour Monsieur !";}__s__+="
-You work in these companies : ";__s__+=ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' );__s__+="
+var __s__="";__s__+="Hello \"";__s__+=recipient.name;__s__+="\", your main company is : ";__s__+=recipient.companies[ 0 ].name;__s__+="
+";if(( !recipient.male )){__s__+="Bonjour Madame !";}else{__s__+="Bonjour Monsieur !";}__s__+="
+You work in these companies : ";__s__+=recipient.companies.map( function( c ) return c.name ).join( ', ' );__s__+="
 Here are your companies :
 ";var rand = Math.random();__s__+="
-";for(( company in ctx.recipient.companies )){__s__+="
+";for(( company in recipient.companies )){__s__+="
 ";if(( rand < .2 )){__s__+="
 	";__s__+=company.name.toLowerCase();__s__+="
 ";}else if(( rand > .7 )){__s__+="
@@ -73,12 +73,12 @@ Here is a full example https://try.haxe.org/#5Ca6a218 :
 ```haxe
 class Test {
 	static function main() {
-		var s = "Hello \"**ctx.recipient.name**\", your main company is : **ctx.recipient.companies[ 0 ].name**
-		**si( !ctx.recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
-		You work in these companies : **ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )**
+		var s = "Hello \"**recipient.name**\", your main company is : **recipient.companies[ 0 ].name**
+		**si( !recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
+		You work in these companies : **recipient.companies.map( function( c ) return c.name ).join( ', ' )**
 		Here are your companies :
 		**pose var rand = Math.random()**
-		**boucle( company in ctx.recipient.companies )**
+		**boucle( company in recipient.companies )**
 		**si( rand < .2 )**
 		**company.name.toLowerCase()**
 		**ou_si( rand > .7 )**
@@ -118,12 +118,12 @@ class Test {
 
 For example if the template has an error like that (line 9) :
 ```
-1.  Hello "::ctx.recipient.name::", your main company is : ::ctx.recipient.companies[ 0 ].name::
-2.  ::if( !ctx.recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
-3.  You work in these companies : ::ctx.recipient.companies.map( function( c ) return c.name ).join( ', ' )::
+1.  Hello "::recipient.name::", your main company is : ::recipient.companies[ 0 ].name::
+2.  ::if( !recipient.male )::Bonjour Madame !::else::Bonjour Monsieur !::end::
+3.  You work in these companies : ::recipient.companies.map( function( c ) return c.name ).join( ', ' )::
 4.  Here are your companies :
 5.  ::do var rand = Math.rand()::
-6.  ::for( company in ctx.recipient.companies )::
+6.  ::for( company in recipient.companies )::
 7.  	::if( rand < .2 )::
 8.  		::company.name.toLowerCase()::
 9.  	::elseif(() rand > .7 )::
