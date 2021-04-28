@@ -208,49 +208,29 @@ class Template {
 	//	Compile-time templates
 	
 	/*  Manual build function
-	*	Usage : @:template( "my/path" ) public function myFunction( arg1, arg2... ){
-			var x = "foo";
-			...
-	*		ftk.format.Template.build();
+	*	Usage : public function myFunction( arg1, arg2... ){
+	*		var x = "foo";
+	*		...
+	*		ftk.format.Template.build( "my/path/to/templateFile" );
 	*	}
 	*/
 
-	macro public static function build( ?stringInterpolationToken : String, ?templateMeta : String ) {
+	macro public static function build( path : String, ?stringInterpolationToken : String ) {
 #if display
 		return;
 #end
-		if( templateMeta == null )	templateMeta = ftk.format.Template.templateMeta;
-
 		var pos		= haxe.macro.Context.currentPos();
 
-		var lcl		= haxe.macro.Context.getLocalClass();
-		var smethod	= haxe.macro.Context.getLocalMethod();
-		var cl		= lcl.get();
-		var method	= null;
-		for( field in cl.statics.get().concat( cl.fields.get() ) ){
-			if( field.name == smethod ){
-				method	= field;
-				break;
-			}
-		}
-		
-		var meta	= method.meta.extract( ':$templateMeta' )[ 0 ];
-		if( meta == null ){
-			haxe.macro.Context.fatalError( 'Template meta not found. @:${ templateMeta }( "my/path" ) needed', pos  );
-		}
-
-		var spath	= switch meta.params[ 0 ].expr {
-			case EConst( CString( s ) )	: s;
-			case _						: 
-				haxe.macro.Context.fatalError( "Invalid meta, String path needed", pos  );
-				null;
-		}
-
+		var cl		= haxe.macro.Context.getLocalClass().get();
 		var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
 		var p		= new haxe.io.Path( clFile );
-		var path	= p.dir + "/" + spath;
+		var _path	= p.dir + "/" + path;
 		
-		var content = sys.io.File.getContent( path );
+		var content = try{
+			sys.io.File.getContent( _path );
+		}catch( e ){
+			haxe.macro.Context.fatalError( e.message, pos );
+		}
 
 		var tpl	= new ftk.format.Template();
 			tpl.parse( content );
@@ -305,12 +285,12 @@ class Template {
 		}
 	}
 
-	/*  Automatic build 
+	/*  Automatic build function
 	*	Usage : 
 	* 	Add `--macro ftk.format.Template.buildTemplates()` into build file
 	*	And `-D hscriptPos` to report error positions
 	*	
-	*	@:template( "my/path" ) public function myFunction( arg1, arg2... );
+	*	@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );
 	*/
 
 	public static function buildTemplates( ?stringInterpolationToken : String, ?templateMeta : String ){
@@ -331,7 +311,17 @@ class Template {
 					if( f.expr == null ){
 						for( meta in field.meta ){
 							if( meta.name == ':$templateMeta' ){
-								f.expr	= macro @:pos( field.pos ) ftk.format.Template.build();		
+								var param	= meta.params[ 0 ];
+								if( param == null ){
+									haxe.macro.Context.fatalError( "Invalid meta. String path needed", field.pos  );
+								}
+								var path	= switch param.expr {
+									case EConst( CString( s ) )	: s;
+									case _						: 
+										haxe.macro.Context.fatalError( "Invalid meta. String path needed", field.pos  );
+										null;
+								}
+								f.expr	= macro @:pos( field.pos ) ftk.format.Template.build( $v{ path } );		
 							}
 						}
 					}
