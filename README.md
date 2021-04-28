@@ -3,7 +3,7 @@ Little **run-time** and **compile-time** template system based on https://github
 
 This is a single simple class that “generates” a “haxe source” which you can use with *hscript* to get a template system working like https://github.com/haxetink/tink_template.
 
-The synthax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch/case, for** statements **“do”** and **comments**.
+The synthax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch, case, for** statements, **“do”** and **comments**.
 
 **It works the same way on run-time and compile-time.**
 
