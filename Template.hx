@@ -38,6 +38,7 @@ class Template {
 
 #if macro
 	static var stringInterpolationToken	= "$";
+	static var templateMeta				= "template";
 #end
 
 	public var SIGN		= ":";
@@ -204,14 +205,18 @@ class Template {
 	
 	/*  Manual build function
 	*	Usage : @:template( "my/path" ) public function myFunction( arg1, arg2... ){
+			var x = "foo";
+			...
 	*		ftk.format.Template.build();
 	*	}
 	*/
 
-	macro public static function build( ?stringInterpolationToken : String ) {
+	macro public static function build( ?stringInterpolationToken : String, ?templateMeta : String ) {
 #if display
 		return;
 #end
+		if( templateMeta == null )	templateMeta = ftk.format.Template.templateMeta;
+
 		var pos		= haxe.macro.Context.currentPos();
 
 		var lcl		= haxe.macro.Context.getLocalClass();
@@ -225,9 +230,9 @@ class Template {
 			}
 		}
 		
-		var meta	= method.meta.extract( ":template" )[ 0 ];
+		var meta	= method.meta.extract( ':$templateMeta' )[ 0 ];
 		if( meta == null ){
-			haxe.macro.Context.fatalError( "Template meta not found. @:template( \"my/path\" ) needed", pos  );
+			haxe.macro.Context.fatalError( 'Template meta not found. @:${ templateMeta }( "my/path" ) needed', pos  );
 		}
 
 		var spath	= switch meta.params[ 0 ].expr {
@@ -304,9 +309,12 @@ class Template {
 	*	@:template( "my/path" ) public function myFunction( arg1, arg2... );
 	*/
 
-	public static function buildTemplates( ?stringInterpolationToken : String ){
+	public static function buildTemplates( ?stringInterpolationToken : String, ?templateMeta : String ){
 		if( stringInterpolationToken != null ){
 			Template.stringInterpolationToken	= stringInterpolationToken;
+		}
+		if( templateMeta != null ){
+			Template.templateMeta	= templateMeta;
 		}
 		haxe.macro.Compiler.addGlobalMetadata( "", '@:build( ftk.format.Template._build() )' );
 	}
@@ -318,7 +326,7 @@ class Template {
 				case FFun(f):
 					if( f.expr == null ){
 						for( meta in field.meta ){
-							if( meta.name == ":template" ){
+							if( meta.name == ':$templateMeta' ){
 								f.expr	= macro @:pos( field.pos ) ftk.format.Template.build();		
 							}
 						}
