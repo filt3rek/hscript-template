@@ -218,19 +218,21 @@ class Template {
 	*/
 
 #if hscript
-	macro public static function build( path : String, ?stringInterpolationToken : String ) {
+	macro public static function build( path : String, ?stringInterpolationToken : String, ?isFullPath : Bool ) {
 #if display
 		return;
 #end
 		var pos		= haxe.macro.Context.currentPos();
 
-		var cl		= haxe.macro.Context.getLocalClass().get();
-		var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
-		var p		= new haxe.io.Path( clFile );
-		var _path	= p.dir + "/" + path;
-		
+		if( !isFullPath ){
+			var cl		= haxe.macro.Context.getLocalClass().get();
+			var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
+			var p		= new haxe.io.Path( clFile );
+			path		= p.dir + "/" + path;
+		}
+				
 		var content = try{
-			sys.io.File.getContent( _path );
+			sys.io.File.getContent( path );
 		}catch( e ){
 			haxe.macro.Context.fatalError( e.message, pos );
 		}
@@ -323,9 +325,13 @@ class Template {
 									case EConst( CString( s ) )	: s;
 									case _						: 
 										haxe.macro.Context.fatalError( "Invalid meta. String path needed", field.pos  );
-										null;
 								}
-								f.expr	= macro @:pos( field.pos ) ftk.format.Template.build( $v{ path } );		
+								var cl		= haxe.macro.Context.getLocalClass().get();
+								var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
+								var p		= new haxe.io.Path( clFile );
+								path		= p.dir + "/" + path;
+								var pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+								f.expr	= macro @:pos( pos ) ftk.format.Template.build( $v{ path }, true );		
 							}
 						}
 					}
