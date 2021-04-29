@@ -69,7 +69,7 @@ Here are your companies :
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#75731Afd :
+Here is a full example https://try.haxe.org/#8F2Cbe77 :
 ```haxe
 class Test {
 	static function main() {
