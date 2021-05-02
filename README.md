@@ -69,7 +69,7 @@ Here are your companies :
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#8F2Cbe77 :
+Here is a full example https://try.haxe.org/#813676FC :
 ```haxe
 class Test {
 	static function main() {
@@ -154,6 +154,7 @@ The easiest way to use it for compile-time is to add this to your build file :
 --macro ftk.format.Template.buildTemplates()
 # And if you want to get template error position :
 -D hscriptPos
+-D templatePos
 ```
 Then the render function is the same as in *tink_template*, for example :
 ```haxe
@@ -179,6 +180,12 @@ public function render( arg1, arg2... ){
 }
 ```
 So you can mix some manipulations and the resulting template.
+
+**Note** : *Don't forget to add that in your build file in order to get the right error's line* :
+```
+-D hscriptPos
+-D templatePos
+```
 
 ### String interpolation
 
