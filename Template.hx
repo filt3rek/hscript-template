@@ -198,12 +198,12 @@ class Template {
 			var ret		: String =  interp.execute( ast );
 			return ret;
 		}
-		#if hscriptPos
+#if hscriptPos
 		catch( e : hscript.Expr.Error ){
 			var lines	= str.split( "\n" );
 			throw new TemplateError( e, hscript.Printer.errorToString( e ) + " : " + lines[ e.line - 1 ].trim() );
 		}
-		#end
+#end
 	}
 #end
 
@@ -215,28 +215,38 @@ class Template {
 	*		...
 	*		ftk.format.Template.build( "my/path/to/templateFile" );
 	*	}
+	*
+	*	Add `-D hscriptPos` to report error line related to hscript interpreter/macro exprs generator (synthax errors)
+	*	Add `-D templatePos` to report error line related to generated expressions
 	*/
 
 #if hscript
-	macro public static function build( path : String, ?stringInterpolationToken : String, ?isFullPath : Bool ) {
+	macro public static function build( path : String, ?stringInterpolationToken : String ) {
 #if display
 		return;
 #end
 		var pos		= haxe.macro.Context.currentPos();
 
-		if( !isFullPath ){
-			var cl		= haxe.macro.Context.getLocalClass().get();
-			var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
-			var p		= new haxe.io.Path( clFile );
-			path		= p.dir + "/" + path;
-		}
-				
+		var cl		= haxe.macro.Context.getLocalClass().get();
+		var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
+		var p		= new haxe.io.Path( clFile );
+		path		= p.dir + "/" + path;
+
 		var content = try{
 			sys.io.File.getContent( path );
 		}catch( e ){
 			haxe.macro.Context.fatalError( e.message, pos );
 		}
 
+		pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+		
+		return macro @:pos( pos ) ftk.format.Template.buildFromString( $v{ content }, $v{ path }, $v{ stringInterpolationToken } );
+	}
+
+	macro public static function buildFromString( content : String, path : String, ?stringInterpolationToken : String, ?args ){
+#if display
+		return;
+#end
 		var tpl	= new ftk.format.Template();
 			tpl.parse( content );
 
@@ -246,7 +256,7 @@ class Template {
 		try{
 			ast	= parser.parseString( tpl.out );
 		}
-		#if hscriptPos
+#if hscriptPos
 		catch( e : hscript.Expr.Error ){
 			var a		= content.split( "\n" );
 			var offset	= 0;
@@ -257,23 +267,48 @@ class Template {
 			var pos	= haxe.macro.Context.makePosition( { file : path, min : offset, max : offset } );
 			haxe.macro.Context.fatalError( e.toString(), pos  );
 		}
-		#end
+#end
 		catch( e ){
 			var pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
 			haxe.macro.Context.fatalError( e.message, pos );
 		}
 		
-		var e	= new hscript.Macro( pos ).convert( ast );
-		// Check String Interpolations
+		var e	= new hscript.Macro( haxe.macro.Context.currentPos() ).convert( ast );
+		
+		// Check String Interpolations (and report exact error line if `templatePos` defined and error occured)
 		switch e.expr{
 			case EBlock(a)	:
+#if templatePos
+				var line		= 1;
+				var exprsBuf	= [];
+#end
 				for( ee in a ){
+#if templatePos
+					exprsBuf.push( ee );
+					var s 	= haxe.macro.ExprTools.toString( ee );
+					try{
+						var len	= s.split( "\\n" ).length;
+						line	+= len - 1;
+						haxe.macro.Context.typeExpr( macro $b{ exprsBuf.concat( [ macro null ] ) } ); // I add `macro null` at the end of the block to be typed to avoid compiler dilemma with if/else if without final else statement : `Void should be String` since the last block expression's type is the type of the whole block.
+					}catch( ex ){
+						var sourceLines	= content.split( "\n" );
+						var offset	= 0;
+						for( i in 0...( line - 1 ) ){
+							var cline	= sourceLines[ i ];
+							offset		+= cline.length + 1;
+						}
+						var pos	= haxe.macro.Context.makePosition( { file : path, min : offset, max : offset } );
+						haxe.macro.Context.fatalError( ex.toString(), pos  );
+					}
+#end
 					haxe.macro.ExprTools.iter( ee, checkStringInterpolation.bind( _, stringInterpolationToken ) );
 				}
 			case _ :
 		}
+		
 		return e;
 	}
+
 #end
 
 #if macro
@@ -294,7 +329,8 @@ class Template {
 	/*  Automatic build function
 	*	Usage : 
 	* 	Add `--macro ftk.format.Template.buildTemplates()` into build file
-	*	And `-D hscriptPos` to report error positions
+	*	Add `-D hscriptPos` to report error line related to hscript interpreter/macro exprs generator (synthax errors)
+	*	Add `-D templatePos` to report error line related to generated expressions
 	*	
 	*	@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );
 	*/
@@ -326,12 +362,19 @@ class Template {
 									case _						: 
 										haxe.macro.Context.fatalError( "Invalid meta. String path needed", field.pos  );
 								}
+								var spath	= path;
 								var cl		= haxe.macro.Context.getLocalClass().get();
 								var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
 								var p		= new haxe.io.Path( clFile );
 								path		= p.dir + "/" + path;
-								var pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
-								f.expr	= macro @:pos( pos ) ftk.format.Template.build( $v{ path }, true );		
+								var content = try{
+									sys.io.File.getContent( path );
+								}catch( e ){
+									haxe.macro.Context.fatalError( e.message, field.pos );
+								}
+								var pos		= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+								var expr	= macro @:pos( pos ) ftk.format.Template.buildFromString( $v{ content }, $v{ path }, null );
+								f.expr	= expr;
 							}
 						}
 					}
