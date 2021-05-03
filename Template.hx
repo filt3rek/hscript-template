@@ -213,7 +213,7 @@ class Template {
 	*	Usage : public function myFunction( arg1, arg2... ){
 	*		var x = "foo";
 	*		...
-	*		ftk.format.Template.build( "my/path/to/templateFile" );
+	*		ftk.format.Template.buildFromFile( "my/path/to/templateFile" );
 	*	}
 	*
 	*	Add `-D hscriptPos` to report error line related to hscript interpreter/macro exprs generator (synthax errors)
