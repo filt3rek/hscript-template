@@ -11,7 +11,7 @@ The main function `parse` just parses a string (that can come from a file) and c
 
 The helper function `execute`, available for run-time, will do the link with *hscript* automatically and give you the result or throw an `TemplateError` with the **line number** and the error that occured.
 
-For compile-time I added another helper macro functions `build` and `buildTemplates`. The first that you can use manually, the second that automatically generates all templates in your project. Take a look at the **Compile-Time** paragraph.
+For compile-time I added another helper macro functions `buildFromFile`, `buildFromString` and `buildTemplates`. The 2 first that you can use manually, the second that automatically generates all templates in your project. Take a look at the **Compile-Time** paragraph.
 
 ## Example of a working template :
 ```
@@ -69,7 +69,7 @@ Here are your companies :
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#813676FC :
+Here is a full example https://try.haxe.org/#45829411 :
 ```haxe
 class Test {
 	static function main() {
@@ -160,7 +160,8 @@ Then the render function is the same as in *tink_template*, for example :
 ```haxe
 @:template( "my/path/to/templateFile" ) public function render( arg1, arg2... );
 ```
-**Note** : *The source file path is relative to the class file. Extension isn't important. You can also specify another template meta that will be used to detect template functions to generate. By default `@:template()` is used but if you want to use `cheese` just do that* :
+**Note** : *With the automatic build, the source file path is relative to the class file. With manual you can specify if it's relative to the class or not by adjusting the `isFullPath` argument.
+Extension isn't important. You can also specify another template meta that will be used to detect template functions to generate. By default `@:template()` is used but if you want to use `cheese` just do that* :
 ``` 
 --macro ftk.format.Template.buildTemplates( null, "cheese" )
 ```
@@ -171,14 +172,15 @@ So you'll have that as templates functions :
 
 It will just parse your template file, convert it to a string concatenation, transform it into Haxe macro expressions and populate the body function with these macro expressions. So the result is a function that you can call anywhere and get the string concatenation.
 
-You can also use the macro `build` function manually like that :
+You can also use the macro `buildFromFile` function manually like that :
 ```haxe
 public function render( arg1, arg2... ){
 	var x	= "foo";
 	...
-	ftk.format.Template.build( "my/path/to/templateFile" );
+	ftk.format.Template.buildFromFile( "my/path/to/templateFile" );
 }
 ```
+Same for the `buildFromString` function except that you directly put the string to be treated as template.
 So you can mix some manipulations and the resulting template.
 
 **Note** : *Don't forget to add that in your build file in order to get the right error's line* :
