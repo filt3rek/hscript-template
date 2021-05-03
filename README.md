@@ -11,7 +11,7 @@ The main function `parse` just parses a string (that can come from a file) and c
 
 The helper function `execute`, available for run-time, will do the link with *hscript* automatically and give you the result or throw an `TemplateError` with the **line number** and the error that occured.
 
-For compile-time I added another helper macro functions `buildFromFile`, `buildFromString` and `buildTemplates`. The 2 first that you can use manually, the second that automatically generates all templates in your project. Take a look at the [**Compile-Time**](https://github.com/filt3rek/hscript-template#compile-time)  paragraph.
+For compile-time I added another helper macro functions `buildFromFile`, `buildFromString` and `buildTemplates`. The 2 first that you can use manually, the second that automatically generates all templates in your project. Take a look at the [**Compile-Time**](#compile-time)  paragraph.
 
 ## Example of a working template :
 ```
