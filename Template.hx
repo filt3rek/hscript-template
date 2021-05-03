@@ -1,11 +1,19 @@
 package ftk.format;
 
+#if macro
+import haxe.macro.Expr;
+import haxe.macro.Context;
+import haxe.macro.Compiler;
+import haxe.macro.ExprTools;
+import haxe.macro.MacroStringTools;
+#end
+
+using StringTools;
+
 /**
  * ...
  * @author filt3rek
  */
-
-using StringTools;
 
 #if ( hscript && hscriptPos )
 class TemplateError {
@@ -221,11 +229,15 @@ class Template {
 	*/
 
 #if hscript
-	macro public static function buildFromFile( path : String, ?stringInterpolationToken : String, ?isFullPath : Bool ) {
+	macro public static function buildFromFile( path : String, ?epath : ExprOf<String>, ?estringInterpolationToken : ExprOf<String>, ?eisFullPath : ExprOf<Bool> ) {
 #if display
 		return;
 #end
-		var pos		= haxe.macro.Context.currentPos();
+		var path						: String	= evalConstExpr( epath );
+		var stringInterpolationToken	: String	= evalConstExpr( estringInterpolationToken );
+		var isFullPath					: Bool		= evalConstExpr( eisFullPath );
+
+		var pos		= Context.currentPos();
 
 		if( path != null && !isFullPath ){
 			path	= getFullPath( path );
@@ -234,19 +246,25 @@ class Template {
 		var content = try{
 			sys.io.File.getContent( path );
 		}catch( e ){
-			haxe.macro.Context.fatalError( e.message, pos );
+			Context.fatalError( e.message, pos );
 		}
 
-		pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+		pos	= Context.makePosition( { file : path, min : 0, max : 0 } );
 		
 		return macro @:pos( pos ) ftk.format.Template.buildFromString( $v{ content }, $v{ path }, $v{ stringInterpolationToken }, true );
 	}
 
-	macro public static function buildFromString( content : String, ?path : String, ?stringInterpolationToken : String, ?isFullPath : Bool ){
+	macro public static function buildFromString( econtent : ExprOf<String>, ?epath : ExprOf<String>, ?estringInterpolationToken : ExprOf<String>, ?eisFullPath : ExprOf<Bool> ){
 #if display
 		return;
 #end
-		var pos	= haxe.macro.Context.currentPos();
+
+		var content						: String	= evalConstExpr( econtent );
+		var path						: String	= evalConstExpr( epath );
+		var stringInterpolationToken	: String	= evalConstExpr( estringInterpolationToken );
+		var isFullPath					: Bool		= evalConstExpr( eisFullPath );
+
+		var pos	= Context.currentPos();
 
 		if( path != null && !isFullPath ){
 			path	= getFullPath( path );
@@ -270,16 +288,16 @@ class Template {
 					var line	= a[ i ];
 					offset		+= line.length + 1;
 				}
-				pos	= haxe.macro.Context.makePosition( { file : path, min : offset, max : offset } );
+				pos	= Context.makePosition( { file : path, min : offset, max : offset } );
 			}
-			haxe.macro.Context.fatalError( e.toString(), pos  );
+			Context.fatalError( e.toString(), pos  );
 		}
 #end
 		catch( e ){
 			if( path != null ){
-				pos	= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+				pos	= Context.makePosition( { file : path, min : 0, max : 0 } );
 			}
-			haxe.macro.Context.fatalError( e.message, pos );
+			Context.fatalError( e.message, pos );
 		}
 
 		var e	= new hscript.Macro( pos ).convert( ast );
@@ -295,11 +313,11 @@ class Template {
 #if templatePos
 					if( path != null ){
 						exprsBuf.push( ee );
-						var s 	= haxe.macro.ExprTools.toString( ee );
+						var s 	= ExprTools.toString( ee );
 						try{
 							var len	= s.split( "\\n" ).length;
 							line	+= len - 1;
-							haxe.macro.Context.typeExpr( macro $b{ exprsBuf.concat( [ macro null ] ) } ); // I add `macro null` at the end of the block to be typed to avoid compiler dilemma with if/else if without final else statement : `Void should be String` since the last block expression's type is the type of the whole block.
+							Context.typeExpr( macro $b{ exprsBuf.concat( [ macro null ] ) } ); // I add `macro null` at the end of the block to be typed to avoid compiler dilemma with if/else if without final else statement : `Void should be String` since the last block expression's type is the type of the whole block.
 						}catch( ex ){
 							var sourceLines	= content.split( "\n" );
 							var offset	= 0;
@@ -307,12 +325,12 @@ class Template {
 								var cline	= sourceLines[ i ];
 								offset		+= cline.length + 1;
 							}
-							var pos	= haxe.macro.Context.makePosition( { file : path, min : offset, max : offset } );
-							haxe.macro.Context.fatalError( ex.toString(), pos  );
+							var pos	= Context.makePosition( { file : path, min : offset, max : offset } );
+							Context.fatalError( ex.toString(), pos  );
 						}
 					}
 #end
-					haxe.macro.ExprTools.iter( ee, checkStringInterpolation.bind( _, stringInterpolationToken ) );
+					ExprTools.iter( ee, checkStringInterpolation.bind( _, stringInterpolationToken ) );
 				}
 			case _ :
 		}
@@ -324,16 +342,16 @@ class Template {
 
 #if macro
 
-	static function checkStringInterpolation( e : haxe.macro.Expr, stringInterpolationToken : String ){
+	static function checkStringInterpolation( e : Expr, stringInterpolationToken : String ){
 		if( stringInterpolationToken == null ) stringInterpolationToken = Template.stringInterpolationToken;
 		switch e.expr {
 			case EConst( CString( s ) )	:
 				if( s.indexOf( stringInterpolationToken ) != -1 ){
 					s		= s.split( stringInterpolationToken ).join( "$" );
-					e.expr	= haxe.macro.MacroStringTools.formatString( s, e.pos ).expr;
+					e.expr	= MacroStringTools.formatString( s, e.pos ).expr;
 				}
 			case _ :
-				haxe.macro.ExprTools.iter( e, checkStringInterpolation.bind( _, stringInterpolationToken ) );
+				ExprTools.iter( e, checkStringInterpolation.bind( _, stringInterpolationToken ) );
 		}
 	}
 
@@ -353,11 +371,11 @@ class Template {
 		if( templateMeta != null ){
 			Template.templateMeta	= templateMeta;
 		}
-		haxe.macro.Compiler.addGlobalMetadata( "", '@:build( ftk.format.Template._build() )' );
+		Compiler.addGlobalMetadata( "", '@:build( ftk.format.Template._build() )' );
 	}
 
-	static function _build() : Array<haxe.macro.Expr.Field> {
-		var fields	= haxe.macro.Context.getBuildFields();
+	static function _build() : Array<Field> {
+		var fields	= Context.getBuildFields();
 		for( field in fields ){
 			switch field.kind{
 				case FFun(f):
@@ -366,21 +384,21 @@ class Template {
 							if( meta.name == ':$templateMeta' ){
 								var param	= meta.params[ 0 ];
 								if( param == null ){
-									haxe.macro.Context.fatalError( "Invalid meta. String path needed", field.pos  );
+									Context.fatalError( "Invalid meta. String path needed", field.pos  );
 								}
 								var path	= switch param.expr {
 									case EConst( CString( s ) )	: s;
 									case _						: 
-										haxe.macro.Context.fatalError( "Invalid meta. String path needed", field.pos  );
+										Context.fatalError( "Invalid meta. String path needed", field.pos  );
 								}
 								path	= getFullPath( path );
 								
 								var content = try{
 									sys.io.File.getContent( path );
 								}catch( e ){
-									haxe.macro.Context.fatalError( e.message, field.pos );
+									Context.fatalError( e.message, field.pos );
 								}
-								var pos		= haxe.macro.Context.makePosition( { file : path, min : 0, max : 0 } );
+								var pos		= Context.makePosition( { file : path, min : 0, max : 0 } );
 								var expr	= macro @:pos( pos ) ftk.format.Template.buildFromString( $v{ content }, $v{ path }, null, true );
 								f.expr	= expr;
 							}
@@ -393,10 +411,18 @@ class Template {
 	}
 
 	static function getFullPath( path : String ){
-		var cl		= haxe.macro.Context.getLocalClass().get();
-		var clFile	= haxe.macro.Context.getPosInfos( cl.pos ).file;
+		var cl		= Context.getLocalClass().get();
+		var clFile	= Context.getPosInfos( cl.pos ).file;
 		var p		= new haxe.io.Path( clFile );
 		return p.dir + "/" + path;
+	}
+
+	static function evalConstExpr( expr : Expr ) : Dynamic {
+		return try{
+			ExprTools.getValue( Context.getTypedExpr( Context.typeExpr( expr ) ) );
+		}catch( e ){
+			Context.fatalError( "Only constant expressions are allowed", expr.pos );
+		}
 	}
 
 #end
