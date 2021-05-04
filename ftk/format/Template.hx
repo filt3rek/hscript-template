@@ -215,14 +215,17 @@ class Template {
 	}
 #end
 
-	//	Compile-time templates
+	// **************	Compile-time templates *****************
 	
 	/*  Manual build function
-	*	Usage : public function myFunction( arg1, arg2... ){
+	*	Usage :
+	*	```haxe
+	*	public function myFunction( arg1, arg2... ){
 	*		var x = "foo";
 	*		...
 	*		ftk.format.Template.buildFromFile( "my/path/to/templateFile" );
 	*	}
+	*	```
 	*
 	*	Add `-D hscriptPos` to report error line related to hscript interpreter/macro exprs generator (synthax errors)
 	*	Add `-D templatePos` to report error line related to generated expressions
@@ -361,7 +364,7 @@ class Template {
 	*	Add `-D hscriptPos` to report error line related to hscript interpreter/macro exprs generator (synthax errors)
 	*	Add `-D templatePos` to report error line related to generated expressions
 	*	
-	*	@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );
+	*	`@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );`
 	*/
 
 	public static function buildTemplates( ?stringInterpolationToken : String, ?templateMeta : String ){
