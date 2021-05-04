@@ -330,7 +330,7 @@ class Template {
 						}
 					}
 #end
-					ExprTools.iter( ee, checkStringInterpolation.bind( _, stringInterpolationToken ) );
+					checkStringInterpolation( ee, stringInterpolationToken );
 				}
 			case _ :
 		}
