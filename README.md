@@ -13,6 +13,19 @@ The helper function `execute`, available for run-time, will do the link with *hs
 
 For compile-time I added another helper macro functions `buildFromFile`, `buildFromString` and `buildTemplates`. The 2 first that you can use manually, the second that automatically generates all templates in your project. Take a look at the [**Compile-Time**](#compile-time)  paragraph.
 
+## Installation
+### Haxelib
+You can use [Haxelib package manager](https://lib.haxe.org/) like that : `haxelib install hscript_template`.
+Then, put that in your haxe build file :
+```
+-lib hscript
+-lib hscript_template
+```
+You can also add expra params in order to get run-time and/or compile-time errors reporting.
+Then you can use it in "automatic" or "manual" mode for compile-time. Take a look at [**Compile-Time**](#compile-time)  paragraph.
+### From sources
+Download the sources. Put it to your project. Build and take a beer.
+
 ## Example of a working template :
 ```
 Hello "::recipient.name::", your main company is : ::recipient.companies[ 0 ].name::
