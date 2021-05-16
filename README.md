@@ -3,7 +3,7 @@ Little **run-time** and **compile-time** template system based on https://github
 
 This is a single simple class that “generates” a “haxe source” which you can use with *hscript* to get a template system working like https://github.com/haxetink/tink_template.
 
-The synthax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch, case, for** statements, **“do”** and **comments**.
+The synthax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch, case, while, for** statements, **“do”** and **comments**.
 
 **It works the same way on run-time and compile-time.**
 
@@ -64,25 +64,25 @@ Here are your companies :
 This is the result you get and give to eat to *hscript* : 
 ```haxe
 var __s__="";__s__+="Hello \"";__s__+=recipient.name;__s__+="\", your main company is : ";__s__+=recipient.companies[ 0 ].name;__s__+="
-";if(( !recipient.male )){__s__+="Bonjour Madame !";}else{__s__+="Bonjour Monsieur !";}__s__+="
-You work in these companies : ";__s__+=recipient.companies.map( function( c ) return c.name ).join( ', ' );__s__+="
-Here are your companies :
-";var rand = Math.random();__s__+="
-";for(( company in recipient.companies )){__s__+="
-";if(( rand < .2 )){__s__+="
-	";__s__+=company.name.toLowerCase();__s__+="
-";}else if(( rand > .7 )){__s__+="
-	";__s__+=company.name.toUpperCase();__s__+="
-";}else{__s__+="
-	";__s__+=company.name;__s__+="
-";}__s__+="
-";}__s__+="";return __s__;
+      ";if(( !recipient.male )){__s__+="Bonjour Madame !";}else{__s__+="Bonjour Monsieur !";}__s__+="
+      You work in these companies : ";__s__+=recipient.companies.map( function( c ) return c.name ).join( ', ' );__s__+="
+      Here are your companies :
+      ";var rand = Math.random();__s__+="
+      ";for( company in recipient.companies ){__s__+="
+        ";if(( rand < .2 )){__s__+="
+		";__s__+=company.name.toLowerCase();__s__+="
+	";}else if(( rand > .7 )){__s__+="
+		";__s__+=company.name.toUpperCase();__s__+="
+	";}else{__s__+="
+		";__s__+=company.name;__s__+="
+	";}__s__+="
+      ";}__s__+="";return __s__;
 ```
 *At the begining I've written a "pretty" mode to output with indents and newlines but I don't see the need at the end because it's to be given to eat to hscript, not to masturbate in front of it, so I removed that.*
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#13C7CeF9 :
+Here is a full example https://try.haxe.org/#911480EE :
 ```haxe
 class Test {
 	static function main() {

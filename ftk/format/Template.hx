@@ -41,6 +41,7 @@ enum ETemplateToken{
 	EElseIf( s : String );
 	EElse;
 	EFor( s : String );
+	EWhile( s : String );
 	ESwitch( s : String );
 	ECase( s : String );
 	EEnd;
@@ -58,6 +59,7 @@ class Template {
 	public var ELSE		= "else";
 	public var ELSEIF	= "elseif";
 	public var FOR		= "for";
+	public var WHILE	= "while";
 	public var SWITCH	= "switch";
 	public var CASE		= "case";
 	public var END		= "end";
@@ -113,6 +115,13 @@ class Template {
 								}else{
 									flow.push( EExpr( buf ) );
 								}
+							}else if( buf.substr( 0, WHILE.length ).toLowerCase() == WHILE.toLowerCase() ){
+								var next	= buf.charCodeAt( WHILE.length );
+								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "(".code ){
+									flow.push( EWhile( buf.substr( WHILE.length ) ) );
+								}else{
+									flow.push( EExpr( buf ) );
+								}
 							}else if( buf.substr( 0, SWITCH.length ).toLowerCase() == SWITCH.toLowerCase() ){
 								var next	= buf.charCodeAt( SWITCH.length );
 								if( next == " ".code || next == "\t".code || next == "\r".code || next == "\n".code || next == "(".code ){
@@ -144,6 +153,8 @@ class Template {
 					}else{
 						if( writeText ){
 							flow.push( EText( buf ) );
+						}else{
+							flow.push( EExpr( "*" + buf + "*" ) );	// Needed to count the right line number in case of error
 						}
 						insideExpr 	= true;
 					}
@@ -176,7 +187,9 @@ class Template {
 				case EElseIf( s ) 	: 
 					out = out + '}else if($s){';
 				case EFor( s ) 	: 
-					out = out + 'for($s){';
+					out = out + 'for$s{';
+				case EWhile( s ) 	: 
+					out = out + 'while($s){';
 				case EDo( s ) 	: 
 					out = out + '$s;';
 				case EElse		: 
@@ -184,7 +197,7 @@ class Template {
 				case ESwitch( s )		: 
 					out = out + 'switch($s){';
 				case ECase( s )		: 
-					out = out + 'case $s:';
+					out = out + 'case$s:';
 				case EEnd		 : 
 					out = out + '}';
 				case _ :

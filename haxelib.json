@@ -4,8 +4,8 @@
 	"license"		: "MIT",
 	"tags"			: ["hscript", "cross", "template"],
 	"description"	: "Little run-time and compile-time template system based on hscript",
-	"version"		: "1.0.0",
-	"releasenote"	: "Initial release, everything is working correctly.",
+	"version"		: "1.0.1",
+	"releasenote"	: "While added, for parenthesis fixed and little bug in line number error report fixed",
 	"contributors"	: ["filt3rek"],
 	"dependencies"	: {
 	  "hscript": ""
