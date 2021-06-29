@@ -5,7 +5,6 @@ import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Compiler;
 import haxe.macro.ExprTools;
-import haxe.macro.TypeTools;
 import haxe.macro.MacroStringTools;
 #end
 
@@ -163,7 +162,11 @@ class Template {
 						if( isInComment ){
 							addComment( s );
 						}else{
+#if macro
 							out	+= '__s__+=$s;';
+#else
+							out	+= '__s__+=toString( $s );';
+#end
 						}
 					}
 				case EIf( s ) 	: 
@@ -327,6 +330,7 @@ class Template {
 			for( field in Reflect.fields( ctx ) ){
 				interp.variables.set( field, Reflect.field( ctx, field ) );
 			}
+			interp.variables.set( "toString", Std.string );
 			var ret		: String =  interp.execute( ast );
 			return ret;
 		}
@@ -436,14 +440,12 @@ class Template {
 #if templatePos
 					if( path != null ){
 						line = checkExpr( ee, exprsBuf, line, content, path );
-						//line = checkExpr( ee, exprsBuf, line, tpl.out, path );
 					}
 #end
 					checkStringInterpolation( ee, stringInterpolationToken );
 				}
 			case _ :
 		}
-		
 		return e;
 	}
 
