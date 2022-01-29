@@ -1,15 +1,15 @@
 # hscript-template
 Little **run-time** and **compile-time** template system based on https://github.com/HaxeFoundation/hscript
 
-This is a single simple class that “generates” a “haxe source” which you can use with *hscript* to get a template system working like https://github.com/haxetink/tink_template.
+This is a <del>single simple class</del> set of 2 simple classes that “generate” a “haxe source” which you can use with *hscript* to get a template system working like https://github.com/haxetink/tink_template.
 
 The synthax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **“do”** and **comments**.
 
 **It works the same way on run-time and compile-time.**
 
-The main function `parse` just parses a string (that can come from a file) and converts it to a **string concatenation**. Then you can give the result to *hscript* manually that will interpret it or use the `execute` function that will do the job automatically.
+The main Parser's function `parse` just parses a string (that can come from a file) and converts it to a **string concatenation**. Then you can give the result to *hscript* manually that will interpret it or use the `execute` function that will do the job automatically.
 
-The helper function `execute`, available for run-time, will do the link with *hscript* automatically and give you the result or throw an `TemplateError` with the **line number** and the error that occured.
+The Template's function `execute`, available for run-time, will do the link with *hscript* automatically and give you the result or throw an `TemplateError` with the **line number**, source and the native hscript error that occured.
 
 For compile-time I added another helper macro functions `buildFromFile`, `buildFromString` and `buildTemplates`. The 2 first that you can use manually, the second that automatically generates all templates in your project. Take a look at the [**Compile-Time**](#compile-time)  paragraph.
 
@@ -82,48 +82,48 @@ var __s__="";__s__+="Hello \"";__s__+=recipient.name;__s__+="\", your main compa
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#602fC0f8 :
+Here is a full example https://try.haxe.org/#5Bb026db :
 ```haxe
 class Test {
 	static function main() {
 		var s = "Hello \"**recipient.name**\", your main company is : **recipient.companies[ 0 ].name**
-		**si( !recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
-		You work in these companies : **recipient.companies.map( function( c ) return c.name ).join( ', ' )**
-		Here are your companies :
-		**pose var rand = Math.random()**
-		**boucle( company in recipient.companies )**
-		**si( rand < .2 )**
+      **si( !recipient.male )**Bonjour Madame !**sinon**Bonjour Monsieur !**fin**
+      You work in these companies : **recipient.companies.map( function( c ) return c.name ).join( ', ' )**
+      Here are your companies :
+      **pose var rand = Math.random()**
+      **boucle( company in recipient.companies )**
+        **si( rand < .2 )**
 		**company.name.toLowerCase()**
-		**ou_si( rand > .7 )**
+	**ou_si( rand > .7 )**
 		**company.name.toUpperCase()**
-		**sinon**
+	**sinon**
 		**company.name**
-		**fin**
-		**fin**";
+	**fin**
+      **fin**";
 
-		var tpl			= new Template();      
-		tpl.SIGN		= "*";
-		tpl.DO			= "pose";
-		tpl.IF			= "si";
-		tpl.ELSEIF		= "ou_si";
-		tpl.ELSE		= "sinon";
-		tpl.FOR			= "boucle";
-		tpl.END			= "fin";
-		tpl.parse( s );
-		trace( tpl.out );
+		var parser 			= new Parser();
+		/*** This part is not needed, it's here just to show that you can change the keywords...*/
+			parser.SIGN 	= "*";
+			parser.DO 		= "pose";
+			parser.IF 		= "si";
+			parser.ELSEIF 	= "ou_si";
+			parser.ELSE 	= "sinon";
+			parser.FOR 		= "boucle";
+			parser.END 		= "fin";
+		/*** */
+   		var output	= parser.parse( s );
+		trace( output );
 
 		var ctx = {
-			recipient: {
+			recipient	: {
 				name		: "Mrs. Annie Cordy",
 				male		: false,
-				companies	: [
-					{ name: "Company 1" },
-					{ name: "Company 2" }
-				]
+				companies	: [{ name : "Company 1" }, { name : "Company 2" }]
 			}
 		}
 
-		var ret	= tpl.execute( ctx );
+		/*var tpl	= new Template();
+    		tpl.execute( output, ctx );*/
 	}
 }
 ```
@@ -150,15 +150,56 @@ For example if the template has an error like that (line 9) :
 With this code :
 ```haxe
 try{
-	return tpl.execute( ctx );
-}catch( e : ftk.format.Template.TemplateError ){
+	return tpl.execute( output, ctx );
+}catch( e : ftk.format.template.Template.TemplateError ){
 	trace( e );
 }
 ```
 
-You will see `Line 9 : Unexpected token: ")" : ::elseif(() rand > .7 )::`
+You will see `hscript:9: Unexpected token: ")" : }else if(() rand > .7 ){`
 
 **Note** : *You have to add `-D hscriptPos` to your build file in order to get error position*
+
+## Code injection - Including templates in templates on run-time
+
+There is a **special function** `__inject__` added automatically into context that permits to inject haxe code at the place where it's called.
+
+This way you can “interact” with all the variables of the context, the ones that was created at run-time (by your source code) and even with the `__s__` global var that is the string output of your template.
+
+So you can easily **include** another parsed template into this `__s__` at this place like that :
+
+```haxe
+var a	= [];
+a[ 0 ]	= '::do up = function( s ){ return s.toUpperCase(); }::';
+a[ 1 ]	= '::include( 0 )::Hello ::up( "filt3rek" ):: !';
+a[ 2 ]	= '::include( 0 )::Goodbye ::up( "filt3rek" ):: !';
+
+var tpl	= new ftk.format.template.Template();
+var p	= new ftk.format.template.Parser();
+
+var ctx	= {
+	include	: function( ind : Int ){
+		var ret	= tpl.execute( '__include__( \'__s__+=${ p.parse( a[ ind ] ) };\' )' );
+		return ret;
+	}
+}
+var source	= '::include( 0 )::::include( 1 ):: It\'s a test ! ::include( 2 )::';
+var source2	= p.parse( source );
+trace( tpl.execute( source2, ctx ) );
+}
+```
+
+That gives you : `Hello FILT3REK ! It's a test ! Goodbye FILT3REK !`
+
+As you can see, I added a custom `include` function into my cutom context in order to make it easier and in fact at the place I call array here, I use to load another template at runtime and inject it's content...
+
+**Note** : *You have to escape quotes by your own, if needed, what can be done like that :*
+
+```haxe
+function escapeQuotes( s : String ){
+	return s.split( '"' ).join( '\\"' ).split( "'" ).join( "\\'" );
+}
+```
 
 ## Compile-time
 
