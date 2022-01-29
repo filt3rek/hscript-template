@@ -160,6 +160,19 @@ You will see `hscript:9: Unexpected token: ")" : }else if(() rand > .7 ){`
 
 **Note** : *You have to add `-D hscriptPos` to your build file in order to get error position*
 
+As you can see, the native TemplateError gives the piece of hscript source code and not the one from the template used. In order to get your template's source code, you'll have to split your template by `\n` and get the right array index -1. The line number is preserved and is the same between both the tmeplate and hscript source's code.
+
+So something like that should do the job :
+```haxe
+try{
+	return tpl.execute( output, ctx );
+}catch( e : ftk.format.template.Template.TemplateError ){
+	var lines	= output.split( "\n" );
+	trace( lines[ e.native.line - 1 ] );
+}
+```
+Will give you : `::elseif(() rand > .7 )::` insted of `}else if(() rand > .7 ){` 
+
 ## Code injection - Including templates in templates on run-time
 
 There is a **special function** `__inject__` added automatically into context that permits to inject haxe code at the place where it's called.
