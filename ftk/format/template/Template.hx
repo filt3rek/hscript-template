@@ -14,7 +14,7 @@ using haxe.macro.ExprTools;
 #end
 
 /**
- * @version 1.2.0
+ * @version 1.2.1
  * @author filt3rek
  */
 
@@ -41,35 +41,35 @@ class Template {
 	static var templateMeta				= "template";
 #end
 
-	var hparser		: hscript.Parser;
-	var hinterp		: hscript.Interp;
+	var hinterp			: hscript.Interp;
+	var currentSource	: String;
 
 	public function new() {
-		hparser	= new hscript.Parser();
 		hinterp = new hscript.Interp();
 		hinterp.variables.set( "__toString__", Std.string );
 		hinterp.variables.set( "__variables__",  hinterp.variables );
-		hinterp.variables.set( "__inject__", function( s ){
-			try{
-				hparser.line	= 1;
-				hinterp.expr( hparser.parseString( s ) );
-			}catch( e : hscript.Expr.Error ){
-				throw new TemplateError( s, e );
-			}
-		});
 	}
 
 	public function execute( s : String, ?ctx : {} ) : String {
 		try{
+			if( currentSource == null ){
+				currentSource	= s;
+			}
 			if( ctx == null )	ctx	= {};
 			for( field in Reflect.fields( ctx ) ){
 				hinterp.variables.set( field, Reflect.field( ctx, field ) );
 			}
-			return hinterp.execute( hparser.parseString( s ) );
+			hinterp.variables.set( "__inject__", function( s ){ 
+				var oldSource	= currentSource;
+				currentSource	= s;
+				return execute( s );
+				currentSource	= oldSource;
+			} );
+			return hinterp.execute( new hscript.Parser().parseString( s ) );
 		}
 #if hscriptPos
 		catch( e : hscript.Expr.Error ){
-			throw new TemplateError( s, e );
+			throw new TemplateError( currentSource, e );
 		}
 #end
 	}
