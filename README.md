@@ -160,7 +160,7 @@ You will see `hscript:9: Unexpected token: ")" : }else if(() rand > .7 ){`
 
 **Note** : *You have to add `-D hscriptPos` to your build file in order to get error position*
 
-As you can see, the native TemplateError gives the piece of hscript source code and not the one from the template used. In order to get your template's source code, you'll have to split your template by `\n` and get the right array index -1. The line number is preserved and is the same between both the tmeplate and hscript source's code.
+As you can see, the native TemplateError gives the piece of hscript source code and not the one from the template used. In order to get your template's source code, you'll have to split your template by `\n` and get the right array index -1. The line number is preserved and is the same between both the template and hscript source's code.
 
 So something like that should do the job :
 ```haxe
@@ -284,4 +284,4 @@ On compile-time, the template is rendered so you get a string concatenation that
 
 ## Last word
 
-This little class is simplier to use that the explanation with my wonderful english in this Readme file to read and understand :rofl:
+This little class is simplier to use than the explanation with my wonderful english in this Readme file to read and understand :rofl:
