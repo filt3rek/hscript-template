@@ -284,4 +284,4 @@ On compile-time, the template is rendered so you get a string concatenation that
 
 ## Last word
 
-This little class is simplier to use than the explanation with my wonderful english in this Readme file to read and understand :rofl:
+This little lib is simplier to use than the explanation with my wonderful english in this Readme file to read and understand :rofl:
