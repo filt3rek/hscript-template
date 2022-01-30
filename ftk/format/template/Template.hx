@@ -62,8 +62,9 @@ class Template {
 			hinterp.variables.set( "__inject__", function( s ){ 
 				var oldSource	= currentSource;
 				currentSource	= s;
-				return execute( s );
+				var ret	= execute( s );
 				currentSource	= oldSource;
+				return ret;
 			} );
 			return hinterp.execute( new hscript.Parser().parseString( s ) );
 		}
