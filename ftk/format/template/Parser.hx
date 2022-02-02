@@ -23,7 +23,6 @@ enum ETemplateToken{
 }
 
 class Parser{
-
 	public var SIGN		= ":";
 	public var COMMENT	= "*";
 	public var IF		= "if";
@@ -54,7 +53,7 @@ class Parser{
 		
 		var isInsideExpr	= false;
 		var doWriteText		= true;
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 		var switchTextFlow	= [];
 #end
 		while( true ){
@@ -70,7 +69,7 @@ class Parser{
 					continue;
 				case ECase(_)	:
 					flow.push( t );
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 					flow			= flow.concat( switchTextFlow );
 					switchTextFlow	= [];
 #end
@@ -83,7 +82,7 @@ class Parser{
 			if( doWriteText ){
 				flow.push( t );
 			}
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 			else{
 				switchTextFlow.push( t );
 			}
@@ -91,7 +90,7 @@ class Parser{
 		}
 
 		var isInComment	= false;
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 		comments	= "";
 #end
 #if macro
@@ -110,7 +109,7 @@ class Parser{
 					}
 				case EExpr( s ) : 
 					if( s.startsWith( COMMENT ) && s.endsWith( COMMENT ) ){
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 						out	+= 'var __comment__ = "' + ( SIGN + SIGN + s + SIGN + SIGN ).split( '"' ).join( '\\"' ) + '";';
 #end
 					}else if( s.startsWith( COMMENT ) ){
@@ -118,7 +117,7 @@ class Parser{
 						addComment( s );
 					}else if( s.endsWith( COMMENT ) ){
 						addComment( s );
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 						comments	= comments.split( '"' ).join( '\\"' );
 						out	+= 'var __comment__ = "' + comments + '";';
 						comments	= "";
@@ -202,7 +201,7 @@ class Parser{
 	}
 
 	inline function addComment( s : String, isText = false ){
-#if hscriptPos
+#if ( !macro || ( macro && macroTemplatePos ) )
 		if( isText ){
 			comments	+= s;
 		}else{
