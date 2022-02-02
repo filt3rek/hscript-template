@@ -82,7 +82,7 @@ var __s__="";__s__+="Hello \"";__s__+=recipient.name;__s__+="\", your main compa
 
 ## Run-time
 
-Here is a full example https://try.haxe.org/#5Bb026db :
+Here is a full example https://try.haxe.org/#1ECddCC0 :
 ```haxe
 class Test {
 	static function main() {
