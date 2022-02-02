@@ -224,10 +224,10 @@ But you can also use the helper function `escapeQuotes` on Template's class
 
 The easiest way to use it for compile-time is to add this to your build file :
 ```
---macro ftk.format.Template.buildTemplates()
+--macro ftk.format.tempate.Template.buildTemplates()
 # And if you want to get template error position :
 -D hscriptPos
--D templatePos
+-D macroTemplatePos
 ```
 Then the render function is the same as in *tink_template*, for example :
 ```haxe
@@ -236,7 +236,7 @@ Then the render function is the same as in *tink_template*, for example :
 **Note** : *With the automatic build, the source file path is relative to the class file. With manual you can specify if it's relative to the class or not by adjusting the `isFullPath` argument.
 Extension isn't important. You can also specify another template meta that will be used to detect template functions to generate. By default `@:template()` is used but if you want to use `cheese` just do that* :
 ``` 
---macro ftk.format.Template.buildTemplates( null, "cheese" )
+--macro ftk.format.template.Template.buildTemplates( null, "cheese" )
 ```
 So you'll have that as templates functions :
 ```
@@ -250,7 +250,7 @@ You can also use the macro `buildFromFile` function manually like that :
 public function render( arg1, arg2... ){
 	var x	= "foo";
 	...
-	ftk.format.Template.buildFromFile( "my/path/to/templateFile" );
+	ftk.format.template.Template.buildFromFile( "my/path/to/templateFile" );
 }
 ```
 Same for the `buildFromString` function except that you directly put the string to be treated as template.
@@ -259,14 +259,14 @@ So you can mix some manipulations and the resulting template.
 **Note** : *Don't forget to add that in your build file in order to get the right error's line* :
 ```
 -D hscriptPos
--D templatePos
+-D macroTemplatePos
 ```
 
 ### String interpolation
 
 Because by default *hscript* doesn't manage string interpolation even in macro mode, another work is needed to get string interpolation working (only in compile-time). For that by default the token `$` is used. But if you use the `$` sign somewhere in your template that has nothing to do with string interpolation, i.e. some javascript scripts use the `$` sign as variables names, you have to specify another token for the real string interpolation token like that :
 ```
---macro ftk.format.Template.buildTemplates( "$$" )
+--macro ftk.format.template.Template.buildTemplates( "$$" )
 ```
 And this will be correctly interpolated:
 ```haxe
