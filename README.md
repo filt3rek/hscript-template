@@ -175,7 +175,7 @@ Will give you : `::elseif(() rand > .7 )::` insted of `}else if(() rand > .7 ){`
 
 ## Code injection - Including templates in templates on run-time
 
-There is a **special function** `__inject__` added automatically into context that permits to inject haxe code at the place where it's called.
+There is a **special function** `__hscriptSource__` added automatically into context that permits to inject haxe code at the place where it's called.
 
 This way you can “interact” with all the variables of the context, the ones that was created at run-time (by your source code) and even with the `__s__` global var that is the string output of your template.
 
@@ -192,7 +192,9 @@ var p	= new ftk.format.template.Parser();
 
 var ctx	= {
 	include	: function( ind : Int ){
-		var ret	= tpl.execute( '__include__( \'__s__+=${ p.parse( a[ ind ] ) };\' )' );
+		var ret	= tpl.execute( '__hscriptSource__( \'__s__+=${ escapeQuotes( p.parse( a[ ind ] ) ) };\' )' );	// (1)
+		// OR using a template's helper function :
+		var ret	= tpl.include( p.parse( a[ ind ] ) );								// (2)
 		return ret;
 	}
 }
@@ -201,18 +203,22 @@ var source2	= p.parse( source );
 trace( tpl.execute( source2, ctx ) );
 }
 ```
-
 That gives you : `Hello FILT3REK ! It's a test ! Goodbye FILT3REK !`
 
-As you can see, I added a custom `include` function into my cutom context in order to make it easier and in fact at the place I call array here, I use to load another template at runtime and inject it's content...
+As you can see, I added a custom `include` function into my cutom context in order to make it easier than directly calling the `__hscriptSource__` function.
+Then, here I call array here, but for my projects, I often load another template at runtime and inject it's content...
 
-**Note** : *You have to escape quotes by your own, if needed, what can be done like that :*
+2 methods here :
 
+(1) Manual injection. You have to escape quotes by your own, if needed, when you directly call the `__hscriptSource__` context's function, what can be done using another helper function `escapeQuotes` on Template's class :
 ```haxe
-function escapeQuotes( s : String ){
+public function escapeQuotes( s : String ){
 	return s.split( '"' ).join( '\\"' ).split( "'" ).join( "\\'" );
 }
 ```
+(2) There also is a `include` **helper function** on Template's class that do "safetly" inclusion for you (i.e. by escaping quotes)
+
+But you can also use the helper function `escapeQuotes` on Template's class
 
 ## Compile-time
 
