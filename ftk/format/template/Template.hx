@@ -22,7 +22,7 @@ using hscript.Tools;
 #end
 
 /**
- * @version 1.2.1
+ * @version 1.2.2
  * @author filt3rek
  */
 
@@ -37,11 +37,10 @@ class TemplateError {
 	}
 
 	public function toString(){
-		var out	= hscript.Printer.errorToString( native );
 #if hscriptPos
-		return source != null ? out + " : " + source.split( "\n" )[ native.line -1 ] : out;
+		return source != null ? native.toString() + " : " + source.split( "\n" )[ native.line -1 ] : native.toString();
 #else
-		return out;
+		return native.toString();
 #end
 	}
 }
@@ -120,11 +119,20 @@ class Template {
 			}else{
 				return @:privateAccess hinterp.exprReturn( expr );
 			}
+		}catch( e : TemplateError ){
+			throw e;
 		}catch( e : Error ){
 			if( runtimePos ){
 				throw new TemplateError( e, currentSource );
 			}else{
 				throw new TemplateError( e );
+			}
+		}catch( e ){
+			if( runtimePos ){
+				var pos	= hinterp.posInfos();
+				throw new TemplateError( new Error( ECustom( e.message ), 0, 0, pos.fileName, pos.lineNumber ), currentSource );
+			}else{
+				throw new TemplateError( new Error( ECustom( e.message ), 0, 0, "hscript", 0 ) );
 			}
 		}
 	}
