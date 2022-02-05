@@ -59,8 +59,9 @@ class Template {
 
 	var runtimePos		: Bool;
 	var currentSource	: String;
-	var oldSources		: Array<String>;
-	var hSources		: Map<String,String>;
+
+	var sourcesStack	: Array<String>;	// inclusions' souces
+	var aSources		: Array<String>;	// functions' calls sources
 
 	/*
 	*	If runtimePos is set to true, it will manage source code if errors occurs, especially when using inclusions
@@ -73,24 +74,24 @@ class Template {
 		hinterp 		= new Interp();
 
 		if( runtimePos ){
-			oldSources		= [];
-			hSources		= [];
-			hinterp.variables.set( "__currentSource__", function( key ){
-				currentSource	= hSources[ key ];
+			sourcesStack	= [];
+			aSources		= [];
+			hinterp.variables.set( "__currentSource__", function( index ){
+				currentSource	= aSources[ index ];
 			} );
 		}
 
 		hinterp.variables.set( "__toString__", Std.string );
 		hinterp.variables.set( "__hscriptSource__", function ( __hscriptSource__ ){
 			if( runtimePos ){	
-				oldSources.push( currentSource );
+				sourcesStack.push( currentSource );
 				currentSource	= __hscriptSource__;
 			}
 
 			var ret	= execute( __hscriptSource__, true );
 
 			if( runtimePos ){
-				currentSource	= oldSources.pop();
+				currentSource	= sourcesStack.pop();
 			}
 			return ret;
 		} );
@@ -145,25 +146,26 @@ class Template {
 		return execute( '__hscriptSource__( \'__s__+=${ escapeQuotes( hscriptSource ) }\' );', true );
 	}
 
-	function addSources( expr : Expr, hscriptSource : String ){
+	function addSources( expr : Expr, ?hscriptSource : String, ?index : Int ){
+		if( hscriptSource != null ){
+			aSources.push( hscriptSource );
+			index	= aSources.length - 1;
+		}
 		switch #if hscriptPos expr.e #else expr #end {
 			case EFunction(args, e, name, ret):
 				if( name == "__currentSource__" || name == "__hscriptSource__" ){
 					return;
 				}else if( name == "__toString__"  ){
-					expr.iter( addSources.bind(_, hscriptSource ) );
+					expr.iter( addSources.bind(_, null, index ) );
 					return;
 				}
 
-				var tmpName			= "fun_" + Math.round( Math.random() * 1000 );
-				hSources[ tmpName ]	= hscriptSource;
-
 				switch #if hscriptPos e.e #else e #end {
 					case EBlock( a )	: 
-						a.unshift( ECall( EIdent( "__currentSource__" ).mk( e ), [ EConst( CString( tmpName ) ).mk( e ) ] ).mk( e ) );
+						a.unshift( ECall( EIdent( "__currentSource__" ).mk( e ), [ EConst( CInt( index ) ).mk( e ) ] ).mk( e ) );
 					case _	:
 				}
-				e.iter( addSources.bind(_, hscriptSource ) );
+				e.iter( addSources.bind(_, null, index ) );
 
 			case ECall(e, params):
 				var name	= switch #if hscriptPos e.e #else e #end{
@@ -173,23 +175,22 @@ class Template {
 				if( name == "__currentSource__" || name == "__hscriptSource__" ){
 					return;
 				}else if( name == "__toString__"  ){
-					expr.iter( addSources.bind(_, hscriptSource ) );
+					expr.iter( addSources.bind(_, null, index ) );
 					return;
 				}
 				
 				var tmpName			= "call_" + Math.round( Math.random() * 1000 );
-				hSources[ tmpName ]	= hscriptSource;
-
+				
 				var ecall	= ECall( e, params ).mk( expr );
 				var eblock	= EBlock([ 
 					EVar( tmpName, null, ecall ).mk( expr ),
-					ECall( EIdent( "__currentSource__" ).mk( expr ), [ EConst( CString( tmpName ) ).mk( expr ) ] ).mk( expr ),
+					ECall( EIdent( "__currentSource__" ).mk( expr ), [ EConst( CInt( index ) ).mk( expr ) ] ).mk( expr ),
 					EIdent( tmpName ).mk( expr ),
 				]);
 				#if hscriptPos expr.e #else expr #end	= eblock;
-				ecall.iter( addSources.bind(_, hscriptSource ) );
+				ecall.iter( addSources.bind(_, null, index ) );
 			case _	: 
-				expr.iter( addSources.bind(_, hscriptSource ) );
+				expr.iter( addSources.bind(_, null, index ) );
 		}
 	}
 
