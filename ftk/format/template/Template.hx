@@ -22,7 +22,7 @@ using hscript.Tools;
 #end
 
 /**
- * @version 1.2.2
+ * @version 1.2.3
  * @author filt3rek
  */
 
@@ -60,7 +60,7 @@ class Template {
 	var runtimePos		: Bool;
 	var currentSource	: String;
 
-	var sourcesStack	: Array<String>;	// inclusions' souces
+	var sourcesStack	: Array<String>;	// inclusions' sources
 	var aSources		: Array<String>;	// functions' calls sources
 
 	/*
@@ -69,7 +69,7 @@ class Template {
 	*	Of course, a bit slower when set to true
 	*/
 
-	public function new( runtimePos = true ) {
+	public function new( runtimePos = true, addStd = false ) {
 		this.runtimePos	= runtimePos;
 		hinterp 		= new Interp();
 
@@ -95,6 +95,18 @@ class Template {
 			}
 			return ret;
 		} );
+
+		if( addStd ){
+			hinterp.variables.set( "Std", Std );
+			hinterp.variables.set( "Math", Math );
+			hinterp.variables.set( "Date", Date );
+			hinterp.variables.set( "StringTools", StringTools );
+			hinterp.variables.set( "DateTools", DateTools );
+			hinterp.variables.set( "Lambda", Lambda );
+			hinterp.variables.set( "StringMap", haxe.ds.StringMap );
+			hinterp.variables.set( "IntMap", haxe.ds.IntMap );
+			hinterp.variables.set( "ObjectMap", haxe.ds.ObjectMap );
+		}
 	}
 
 	/*
@@ -211,7 +223,7 @@ class Template {
 	*	}
 	*
 	*	Add `-D hscriptPos` to report error line related to hscript macro exprs generator
-	*	Add `-D macroTemplatePos` to report error line related to generated expressions
+	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
 	*/
 
 	macro public static function buildFromFile( path : String, ?stringInterpolationToken : String, ?isFullPath : Bool ) {
@@ -251,7 +263,7 @@ class Template {
 		try{
 			ast	= parser.parseString( new Parser().parse( content ) );
 		}
-#if ( macroTemplatePos && hscriptPos )
+#if ( hscript_template_macro_pos && hscriptPos )
 		catch( e : hscript.Expr.Error ){
 			if( path != null ){
 				var a		= content.split( "\n" );
@@ -274,15 +286,15 @@ class Template {
 
 		var e	= new Macro( pos ).convert( ast );
 
-		// Check String Interpolations (and report exact error line if `macroTemplatePos` defined and error occured)
+		// Check String Interpolations (and report exact error line if `hscript_template_macro_pos` defined and error occured)
 		switch e.expr{
 			case EBlock(a)	:
-#if macroTemplatePos
+#if hscript_template_macro_pos
 				var exprsBuf	= [];
 				var line		= 1;
 #end
 				for( ee in a ){
-#if macroTemplatePos
+#if hscript_template_macro_pos
 					if( path != null ){
 						line = checkExpr( ee, exprsBuf, line, content, path );
 					}
@@ -296,7 +308,7 @@ class Template {
 
 #if macro
 
-#if macroTemplatePos
+#if hscript_template_macro_pos
 	static function checkExpr( expr : Expr, exprsBuf : Array<Expr>, line : Int, content : String, path : String ) : Int {
 		var skip	= true;
 		switch expr.expr {
@@ -400,12 +412,12 @@ class Template {
 	*	Usage : 
 	* 	Add `--macro ftk.format.Template.buildTemplates()` into build file
 	*	Add `-D hscriptPos` to report error line related to hscript macro exprs generator
-	*	Add `-D macroTemplatePos` to report error line related to generated expressions
+	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
 	*	
 	*	@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );
 	*/
 
-	public static function buildTemplates( ?stringInterpolationToken : String, ?templateMeta : String ){
+	public static function buildTemplates( pathFilter = "", recursive = false, ?stringInterpolationToken : String, ?templateMeta : String ){
 		if( Context.definedValue( "hscript" ) == null ){
 			Context.fatalError( "hscript needed to use ftk.format.template.Template and generate templates. Please add -lib hscript.", Context.currentPos() );
 		}
@@ -415,10 +427,13 @@ class Template {
 		if( templateMeta != null ){
 			Template.templateMeta	= templateMeta;
 		}
-		Compiler.addGlobalMetadata( "", '@:build( ftk.format.template.Template._build() )' );
+		Compiler.addGlobalMetadata( pathFilter, '@:build( ftk.format.template.Template.build() )', recursive );
 	}
 
-	static function _build() : Array<Field> {
+	public static function build() : Array<Field> {
+#if hscript_template_build_trace
+		trace( Context.getLocalType().getParameters()[ 0 ] );
+#end
 		var fields	= Context.getBuildFields();
 		for( field in fields ){
 			switch field.kind{
