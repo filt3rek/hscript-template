@@ -3,7 +3,7 @@ Little **run-time** and **compile-time** template system based on https://github
 
 This is a <del>single simple class</del> set of 2 simple classes that “generate” a “haxe source” which you can use with *hscript* to get a template system working like https://github.com/haxetink/tink_template.
 
-The synthax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **“do”** and **comments**.
+The syntax is almost the same as in *tink_template* and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **“do”** and **comments**. I was mainly inspired by *tink_template*'s process of injection of code in body function. Thanks Juraj.
 
 **It works the same way on run-time and compile-time.**
 
@@ -227,7 +227,7 @@ The easiest way to use it for compile-time is to add this to your build file :
 --macro ftk.format.tempate.Template.buildTemplates()
 # And if you want to get template error position :
 -D hscriptPos
--D macroTemplatePos
+-D hscript_template_macro_pos
 ```
 Then the render function is the same as in *tink_template*, for example :
 ```haxe
@@ -259,7 +259,7 @@ So you can mix some manipulations and the resulting template.
 **Note** : *Don't forget to add that in your build file in order to get the right error's line* :
 ```
 -D hscriptPos
--D macroTemplatePos
+-D hscript_template_macro_pos
 ```
 
 ### String interpolation
