@@ -44,6 +44,12 @@ class Parser{
 
 	public function new(){}
 
+	/*  
+	*	Main function that parse a template's source into hscript source
+	*	
+	*	@param	str	: Template's source
+	*/
+
 	public function parse( str : String ){
 		source		= str;
 		var flow	= [];
