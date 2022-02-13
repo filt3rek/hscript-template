@@ -2,11 +2,17 @@
 # hscript-template
 Little **run-time** and **compile-time** template system based on [hscript](https://github.com/HaxeFoundation/hscript)
 
-This is a set of 2 simple classes that "generates"a "haxe source" which is given to *hscript* to get a template system working both on compile-time and run-time.
+This is a set of 2 simple classes :
+- The *Parser* that "generates" a "hscript source" from a template source string.
+- The *Template* that manages the "hscript source".
+
+You get a full template system working both on compile-time and run-time.
 
 The syntax is close to the `haxe.Template` or [tink_template](https://github.com/haxetink/tink_template) one and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **"do"** and **comments**.
 
-*For more details on how does it work, see at the end of this file.*
+See the examples [here](https://github.com/filt3rek/hscript-template/edit/master/README.md#examples)
+
+*For more details on how does it work, see at the end of this [file](https://github.com/filt3rek/hscript-template/edit/master/README.md#how-does-it-work-).*
 
 ## Installation
 ### Haxelib
