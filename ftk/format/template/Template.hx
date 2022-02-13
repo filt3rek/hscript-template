@@ -142,22 +142,14 @@ class Template {
 		}catch( e : TemplateError ){
 			throw e;
 		}catch( e : Error ){
-			if( runtimePos ){
-				throw new TemplateError( e, currentSource );
-			}else{
-				throw new TemplateError( e );
-			}
+			throw new TemplateError( e, runtimePos ? currentSource : null );
 		}catch( e ){
-			if( runtimePos ){
-				var pos	= hinterp.posInfos();
 #if hscriptPos
-				throw new TemplateError( new Error( ECustom( e.message ), 0, 0, pos.fileName, pos.lineNumber ), currentSource );
+			var pos	= hinterp.posInfos();
+			throw new TemplateError( new Error( ECustom( e.message ), 0, 0, pos.fileName, pos.lineNumber ), runtimePos ? currentSource : null );
 #else
-				throw new TemplateError( ECustom( e.message ), currentSource );
+			throw new TemplateError( ECustom( e.message ), runtimePos ? currentSource : null );
 #end
-			}else{
-				throw new TemplateError( ECustom( e.message ) );
-			}
 		}
 	}
 
