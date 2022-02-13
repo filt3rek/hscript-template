@@ -27,7 +27,7 @@ You can use [Haxelib package manager](https://lib.haxe.org/) like that : `haxeli
 
 Then, put that in your haxe project's build file :
 ```
--lib hscript_template
+-lib hscript-template
 ```
 ### Manual
 Download the sources from Github.
