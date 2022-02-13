@@ -132,6 +132,8 @@ This function takes these arguments :
  - `?runtimePos` : If set to true, it will manage source code if errors occurs, especially when using inclusions. true by dafault
  - `?addStd` : If set to true, adds some standard haxe classes (Std, Math, Date, StringTools...)
 
+**Note** : Don't forget to add `-D hscriptPos` if you set `runtimePos` at true to get the line position in error case !
+
 #### Main function that generates a template
 - `execute( hscriptSource : String, ?ctx : {}, isInclusion = false )`
 
