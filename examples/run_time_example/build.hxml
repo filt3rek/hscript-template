@@ -1,0 +1,3 @@
+-lib hscript-template
+-m Main
+--php bin

@@ -39,7 +39,7 @@ class TemplateError {
 #if hscriptPos
 		return source != null ? native.toString() + " : " + source.split( "\n" )[ native.line -1 ] : native.toString();
 #else
-		return native.toString();
+		return native;
 #end
 	}
 }
@@ -150,9 +150,13 @@ class Template {
 		}catch( e ){
 			if( runtimePos ){
 				var pos	= hinterp.posInfos();
+#if hscriptPos
 				throw new TemplateError( new Error( ECustom( e.message ), 0, 0, pos.fileName, pos.lineNumber ), currentSource );
+#else
+				throw new TemplateError( ECustom( e.message ), currentSource );
+#end
 			}else{
-				throw new TemplateError( new Error( ECustom( e.message ), 0, 0, "hscript", 0 ) );
+				throw new TemplateError( ECustom( e.message ) );
 			}
 		}
 	}
@@ -333,6 +337,8 @@ class Template {
 		return;
 #end
 		var pos		= Context.currentPos();
+
+		trace( path );
 
 		if( !isFullPath ){
 			path	= getFullPath( path );
@@ -531,7 +537,7 @@ class Template {
 		var cl		= Context.getLocalClass().get();
 		var clFile	= Context.getPosInfos( cl.pos ).file;
 		var p		= new haxe.io.Path( clFile );
-		return p.dir + "/" + path;
+		return ( p.dir != null ? p.dir + "/" : "" ) + path;
 	}
 #end
 }

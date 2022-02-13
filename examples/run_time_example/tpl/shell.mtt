@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>::if ( title != null )::::title::::else::Default Title::end::</title>
+	</head>
+	<body>
+		::if( content != null )::
+		::content::
+		::else::
+		Default content
+		::end::
+	</body>
+</html>

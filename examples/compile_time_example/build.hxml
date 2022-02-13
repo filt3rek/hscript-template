@@ -1,0 +1,4 @@
+-lib hscript-template
+--macro ftk.format.template.Template.buildTemplates( true )
+-m Main
+--php bin
