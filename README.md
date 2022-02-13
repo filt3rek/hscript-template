@@ -10,9 +10,16 @@ You get a full template system working both on compile-time and run-time.
 
 The syntax is close to the `haxe.Template` or [tink_template](https://github.com/haxetink/tink_template) one and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **"do"** and **comments**.
 
-See the examples [here](https://github.com/filt3rek/hscript-template/edit/master/README.md#examples)
-
-*For more details on how does it work, see at the end of this [file](https://github.com/filt3rek/hscript-template/edit/master/README.md#how-does-it-work-).*
+- [Installation](https://github.com/filt3rek/hscript-template/blob/master/README.md#installation)
+- [Usage](https://github.com/filt3rek/hscript-template/blob/master/README.md#usage)
+- [Examples](https://github.com/filt3rek/hscript-template/blob/master/README.md#examples)
+- [Delimiter and keywords customization](https://github.com/filt3rek/hscript-template/blob/master/README.md#delimiter-and-keywords-customization)
+- [Error handling](https://github.com/filt3rek/hscript-template/blob/master/README.md#error-handling)
+- [Code injection - Including templates in templates at run-time](https://github.com/filt3rek/hscript-template/blob/master/README.md#code-injection---including-templates-in-templates-at-run-time)
+- [String interpolation](https://github.com/filt3rek/hscript-template/blob/master/README.md#string-interpolation)
+- [How does it work ?](https://github.com/filt3rek/hscript-template/blob/master/README.md#how-does-it-work-)
+- ["Do" statement](https://github.com/filt3rek/hscript-template/blob/master/README.md#do-statement)
+- [Lasts words](https://github.com/filt3rek/hscript-template/blob/master/README.md#lasts-words)
 
 ## Installation
 ### Haxelib
@@ -202,7 +209,7 @@ Here are your companies :
 	Company 1
 	Company 2
 ```
-## Sign and keywords customization
+## Delimiter and keywords customization
 We can also customize the *sign* used to delimitate expressions and the *keywords*.
 ```
 var parser 			= new Parser();
