@@ -19,7 +19,7 @@ The syntax is close to the `haxe.Template` or [tink_template](https://github.com
 - [String interpolation](https://github.com/filt3rek/hscript-template/blob/master/README.md#string-interpolation)
 - [How does it work ?](https://github.com/filt3rek/hscript-template/blob/master/README.md#how-does-it-work-)
 - ["Do" statement](https://github.com/filt3rek/hscript-template/blob/master/README.md#do-statement)
-- [Lasts words](https://github.com/filt3rek/hscript-template/blob/master/README.md#lasts-words)
+- [Last words](https://github.com/filt3rek/hscript-template/blob/master/README.md#last-words)
 
 ## Installation
 ### Haxelib
@@ -361,7 +361,7 @@ On compile-time, the template is rendered so you get a string concatenation that
 
 This function just returns this string with the basic text and all the evaluated expressions...
 
-## Lasts words
+## Last words
 *I was mainly inspired by the [tink_template](https://github.com/haxetink/tink_template)'s process of code injection in body function. Thanks Juraj for this wonderful lib that I used for many years !*
 
 This little lib is simplier to use than the explanation with my wonderful english in this Readme file to read and understand :rofl:
