@@ -1,4 +1,5 @@
 -lib hscript-template
+# Have to force at true for pathFilter arg because of that issue : https://github.com/HaxeFoundation/haxe/issues/10591
 --macro ftk.format.template.Template.buildTemplates( true )
 -m Main
 --php bin
