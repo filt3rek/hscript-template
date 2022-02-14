@@ -10,16 +10,16 @@ You get a full template system working both on compile-time and run-time.
 
 The syntax is close to the `haxe.Template` or [tink_template](https://github.com/haxetink/tink_template) one and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **"do"** and **comments**.
 
-- [Installation](https://github.com/filt3rek/hscript-template/blob/master/README.md#installation)
-- [Usage](https://github.com/filt3rek/hscript-template/blob/master/README.md#usage)
-- [Examples](https://github.com/filt3rek/hscript-template/blob/master/README.md#examples)
-- [Delimiter and keywords customization](https://github.com/filt3rek/hscript-template/blob/master/README.md#delimiter-and-keywords-customization)
-- [Error handling](https://github.com/filt3rek/hscript-template/blob/master/README.md#error-handling)
-- [Code injection - Including templates in templates at run-time](https://github.com/filt3rek/hscript-template/blob/master/README.md#code-injection---including-templates-in-templates-at-run-time)
-- [String interpolation](https://github.com/filt3rek/hscript-template/blob/master/README.md#string-interpolation)
-- [How does it work ?](https://github.com/filt3rek/hscript-template/blob/master/README.md#how-does-it-work-)
-- ["Do" statement](https://github.com/filt3rek/hscript-template/blob/master/README.md#do-statement)
-- [Last words](https://github.com/filt3rek/hscript-template/blob/master/README.md#last-words)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Delimiter and keywords customization](#delimiter-and-keywords-customization)
+- [Error handling](#error-handling)
+- [Code injection - Including templates in templates at run-time](#code-injection---including-templates-in-templates-at-run-time)
+- [String interpolation](#string-interpolation)
+- [How does it work ?](#how-does-it-work-)
+- ["Do" statement](#do-statement)
+- [Last words](#last-words)
 
 ## Installation
 ### Haxelib
