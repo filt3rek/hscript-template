@@ -84,6 +84,13 @@ public function myFunction( arg1, arg2... ){
   ftk.format.template.Template.buildFromString( "::x:: is not bar" ); // foo is not bar
 }
 ```
+#### A Helper macro init function to add and keep haxe std classes at compilation (used with the `addStd` run-time *Template* [constructor](#constructor-))
+- `addStd()`
+
+Add `--macro ftk.format.Template.addStd()` into the *.hxml* build file.
+
+This function will add and keep all the std classes to be available at run-time (when addStd is set at true in the *Template* constructor)
+
 #### Compilation directives
  - `-D hscriptPos` to report error line related to hscript macro exprs generator.
  - `-D hscript_template_macro_pos` to report error line related to generated expressions.
@@ -130,9 +137,12 @@ This function takes this argument :
 
 This function takes these arguments :
  - `?runtimePos` : If set to true, it will manage source code if errors occurs, especially when using inclusions. true by dafault
- - `?addStd` : If set to true, adds some standard haxe classes (Std, Math, Date, StringTools...)
+ - `?addStd` : If set to true, adds some standard haxe classes (Std, Math, Date, StringTools, DateTools, Lambda, haxe.ds.StringMap, haxe.ds.IntMap, haxe.ds.ObjectMap). *The package is removed so you'll access `IntMap` and not `haxe.ds.IntMap`*
 
-**Note** : Don't forget to add `-D hscriptPos` if you set `runtimePos` at true to get the line position in error case !
+**Notes** : 
+- Don't forget to add `-D hscriptPos` if you set `runtimePos` at true to get the line position in error case !
+- Be sure that the std haxe classes are included (and all the wanted fields). You can add it in compilation with this init macro :
+  - `--macro ftk.format.template.Template.addStd()`
 
 #### Main function that generates a template
 - `execute( hscriptSource : String, ?ctx : {}, isInclusion = false )`
@@ -369,4 +379,3 @@ This function just returns this string with the basic text and all the evaluated
 This little lib is simplier to use than the explanation with my wonderful english in this Readme file to read and understand :rofl:
 
 You can take a look at [tink_template](https://github.com/haxetink/tink_template) Readme file if you haven't understood something here because the approach is very similar.
-

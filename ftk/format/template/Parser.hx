@@ -3,7 +3,7 @@ package ftk.format.template;
 using StringTools;
 
 /**
- * @version 1.2.3
+ * @version 1.2.4
  * @author filt3rek
  */
 

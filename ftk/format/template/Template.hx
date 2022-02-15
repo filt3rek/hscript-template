@@ -21,7 +21,7 @@ using hscript.Tools;
 #end
 
 /**
- * @version 1.2.3
+ * @version 1.2.4
  * @author filt3rek
  */
 
@@ -46,6 +46,8 @@ class TemplateError {
 #end
 
 class Template {
+
+	static var stdClasses	= [ "Std", "Math", "Date", "StringTools", "DateTools", "Lambda", "haxe.ds.StringMap", "haxe.ds.IntMap", "haxe.ds.ObjectMap" ];
 
 #if macro
 	static var templateMeta	= ":template";
@@ -98,15 +100,10 @@ class Template {
 		} );
 
 		if( addStd ){
-			hinterp.variables.set( "Std", Std );
-			hinterp.variables.set( "Math", Math );
-			hinterp.variables.set( "Date", Date );
-			hinterp.variables.set( "StringTools", StringTools );
-			hinterp.variables.set( "DateTools", DateTools );
-			hinterp.variables.set( "Lambda", Lambda );
-			hinterp.variables.set( "StringMap", haxe.ds.StringMap );
-			hinterp.variables.set( "IntMap", haxe.ds.IntMap );
-			hinterp.variables.set( "ObjectMap", haxe.ds.ObjectMap );
+			for( cname in stdClasses ){
+				var path	= cname.split( "." );
+				hinterp.variables.set( path[ path.length - 1 ], Type.resolveClass( cname ) );
+			}
 		}
 	}
 
@@ -249,6 +246,18 @@ class Template {
 			Template.templateMeta	= templateMeta;
 		}
 		Compiler.addGlobalMetadata( pathFilter, '@:build( ftk.format.template.Template.build() )', recursive );
+#end
+	}
+
+	/*
+	*	This function will add and keep all the std classes to be available at run-time (when addStd is set at true in the Template constructor)
+	*/
+
+	public static function addStd(){
+#if macro
+		for( cname in stdClasses ){
+			haxe.macro.Compiler.addMetadata( "@:keep", cname );
+		}
 #end
 	}
 
