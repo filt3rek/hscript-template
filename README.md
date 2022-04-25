@@ -44,7 +44,7 @@ All compile-time functions are statics of *Template* class
 #### Automatic global build function (Init macro)
  - `buildTemplates( pathFilter = "", recursive = false, ?templateMeta : String )`
 
-Add `--macro ftk.format.Template.buildTemplates()` into the *.hxml* build file.
+Add `--macro ftk.format.template.Template.buildTemplates()` into the *.hxml* build file.
 
 The function will build all functions like that : `@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );` in every types defined by `pathFilter` in your projet.
 
@@ -87,7 +87,7 @@ public function myFunction( arg1, arg2... ){
 #### A Helper macro init function to add and keep haxe std classes at compilation (used with the `addStd` run-time *Template* [constructor](#constructor-))
 - `addStd()`
 
-Add `--macro ftk.format.Template.addStd()` into the *.hxml* build file.
+Add `--macro ftk.format.template.Template.addStd()` into the *.hxml* build file.
 
 This function will add and keep all the std classes to be available at run-time (when addStd is set at true in the *Template* constructor)
 
