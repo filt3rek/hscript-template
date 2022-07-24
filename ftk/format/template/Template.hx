@@ -50,7 +50,8 @@ class Template {
 	static var stdClasses	= [ "Std", "Math", "Date", "StringTools", "DateTools", "Lambda", "haxe.ds.StringMap", "haxe.ds.IntMap", "haxe.ds.ObjectMap" ];
 
 #if macro
-	static var templateMeta	= ":template";
+	static var templateMeta		= ":template";
+	static var processedTypes	= [];
 #else
 
 	/******************************   Run-time templates   **************************************/
@@ -237,8 +238,11 @@ class Template {
 	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
 	*/
 
-	public static function buildTemplates( pathFilter = "", recursive = false, ?templateMeta : String ){
+	public static function buildTemplates( pathFilter = "", recursive = false, ?templateMeta : String, ?pos : haxe.PosInfos ){
 #if macro
+#if hscript_template_build_trace
+		trace( pos.fileName );
+#end
 		if( Context.definedValue( "hscript" ) == null ){
 			Context.fatalError( "hscript needed to use ftk.format.template.Template and generate templates. Please add -lib hscript.", Context.currentPos() );
 		}
@@ -275,8 +279,15 @@ class Template {
 
 #if macro
 	public static function build() : Array<Field> {
+		var tname	= switch Context.getLocalType(){
+			case 	TInst(_.toString()=>s,_), TAbstract(_.toString()=>s,_)	: s;
+			case _	: null;
+		}
+		if( tname == null )	return null;
+		if( processedTypes.indexOf( tname ) > -1 )	return null;
+		processedTypes.push( tname );
 #if hscript_template_build_trace
-		trace( Context.getLocalType().getParameters()[ 0 ] );
+		trace( "Processing : " + tname );
 #end
 		var fields	= Context.getBuildFields();
 		for( field in fields ){

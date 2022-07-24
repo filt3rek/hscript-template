@@ -100,9 +100,9 @@ class Parser{
 		comments	= "";
 #end
 #if macro
-		out	= '{var __s__="";';
+		out	= '{var __comments__=[];var __s__="";';
 #else
-		out	= '{__s__="";';
+		out	= '{__comments__=[];__s__="";';
 #end
 		for( token in flow ){
 			switch token {
@@ -116,7 +116,7 @@ class Parser{
 				case EExpr( s ) : 
 					if( s.startsWith( COMMENT ) && s.endsWith( COMMENT ) ){
 #if ( !macro || ( macro && hscript_template_macro_pos ) )
-						out	+= 'var __comment__ = "' + ( SIGN + SIGN + s + SIGN + SIGN ).split( '"' ).join( '\\"' ) + '";';
+						out	+= '__comments__.push("' + ( SIGN + SIGN + s + SIGN + SIGN ).split( '"' ).join( '\\"' ) + '");';
 #end
 					}else if( s.startsWith( COMMENT ) ){
 						isInComment	= true;
@@ -125,7 +125,7 @@ class Parser{
 						addComment( s );
 #if ( !macro || ( macro && hscript_template_macro_pos ) )
 						comments	= comments.split( '"' ).join( '\\"' );
-						out	+= 'var __comment__ = "' + comments + '";';
+						out	+= '__comments__.push("' + comments + '");';
 						comments	= "";
 #end
 						isInComment	= false;
