@@ -94,6 +94,7 @@ This function will add and keep all the std classes to be available at run-time 
 #### Compilation directives
  - `-D hscriptPos` to report error line related to hscript macro exprs generator.
  - `-D hscript_template_macro_pos` to report error line related to generated expressions.
+ - `-D hscript_in_macro` to use run time-style templating in macro context (e.g., when using in your own macros).
 
 #### Notes 
 *With the automatic build, the source file path is relative to the class file.*

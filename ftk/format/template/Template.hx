@@ -1,6 +1,6 @@
 package ftk.format.template;
 
-#if macro
+#if (macro && !hscript_in_macro)
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Compiler;
@@ -14,7 +14,7 @@ import hscript.Tools;
 #end
 
 using StringTools;
-#if macro
+#if (macro && !hscript_in_macro)
 using haxe.macro.ExprTools;
 #else
 using hscript.Tools;
@@ -25,7 +25,7 @@ using hscript.Tools;
  * @author filt3rek
  */
 
-#if !macro
+#if (!macro || hscript_in_macro)
 class TemplateError {
 	public var source	(default,null)	: Null<String>;
 	public var native	(default,null)	: Error;
@@ -49,7 +49,7 @@ class Template {
 
 	static var stdClasses	= [ "Std", "Math", "Date", "StringTools", "DateTools", "Lambda", "haxe.ds.StringMap", "haxe.ds.IntMap", "haxe.ds.ObjectMap" ];
 
-#if macro
+#if (macro && !hscript_in_macro)
 	static var templateMeta		= ":template";
 	static var processedTypes	= [];
 #else
@@ -239,7 +239,7 @@ class Template {
 	*/
 
 	public static function buildTemplates( pathFilter = "", recursive = false, ?templateMeta : String, ?pos : haxe.PosInfos ){
-#if macro
+#if (macro && !hscript_in_macro)
 #if hscript_template_build_trace
 		trace( pos.fileName );
 #end
@@ -258,7 +258,7 @@ class Template {
 	*/
 
 	public static function addStd(){
-#if macro
+#if (macro && !hscript_in_macro)
 		for( cname in stdClasses ){
 			haxe.macro.Compiler.addMetadata( "@:keep", cname );
 		}
@@ -277,7 +277,7 @@ class Template {
 	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
 	*/
 
-#if macro
+#if (macro && !hscript_in_macro)
 	public static function build() : Array<Field> {
 		var tname	= switch Context.getLocalType(){
 			case 	TInst(_.toString()=>s,_), TAbstract(_.toString()=>s,_)	: s;
@@ -344,6 +344,7 @@ class Template {
 	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
 	*/
 
+#if (macro && !hscript_in_macro)
 	macro public static function buildFromFile( path : String, ?isFullPath : Bool ) {
 #if display
 		return;
@@ -446,7 +447,6 @@ class Template {
 
 	//
 
-#if macro
 #if hscript_template_macro_pos
 	static function checkExpr( expr : Expr, exprsBuf : Array<Expr>, line : Int, content : String, path : String ) : Int {
 		var skip	= true;
