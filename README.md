@@ -2,9 +2,10 @@
 # hscript-template
 Little **run-time** and **compile-time** template system based on [hscript](https://github.com/HaxeFoundation/hscript)
 
-This is a set of 2 simple classes :
+This is a set of simple classes structured like hscript classes :
 - The *Parser* that "generates" a "hscript source" from a template source string.
-- The *Template* that manages the "hscript source".
+- The *Macro* that manages the "hscript source" on compilte-time
+- The *Interp* that manages the "hscript source" on runtime-time
 
 You get a full template system working both on compile-time and run-time.
 
@@ -12,6 +13,8 @@ The syntax is close to the `haxe.Template` or [tink_template](https://github.com
 
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Compile-time *Macro* class](#compile-time-macro-class)
+  - [Run-time *Parser* class](#run-time-parser-class)
 - [Examples](#examples)
 - [Delimiter and keywords customization](#delimiter-and-keywords-customization)
 - [Error handling](#error-handling)
@@ -34,17 +37,17 @@ Download the sources from Github.
 
 Then, put that in your haxe project’s build file :
 ```
--p path/to/the/hscript_template/sources
+-p path/to/the/hscript-template/sources
 -lib hscript
 ```
 
 ## Usage
-### Compile-time *Template* class
-All compile-time functions are statics of *Template* class
+### Compile-time *Macro* class
+All compile-time functions are statics of *Macro* class
 #### Automatic global build function (Init macro)
  - `buildTemplates( pathFilter = "", recursive = false, ?templateMeta : String )`
 
-Add `--macro ftk.format.template.Template.buildTemplates()` into the *.hxml* build file.
+Add `--macro ftk.format.template.Macro.buildTemplates()` into the *.hxml* build file.
 
 The function will build all functions like that : `@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );` in every types defined by `pathFilter` in your projet.
 
@@ -56,7 +59,7 @@ This function takes these optional arguments :
 #### Automatic per-type build function (Build macro)
  - `build()`
 
-Add `@:build( ftk.format.template.Template.build() )` at the type where you want to proceed all `@:template` functions.
+Add `@:build( ftk.format.template.Macro.build() )` at the type where you want to proceed all `@:template` functions.
 
 This function will build all functions like that : `@:template( "my/path/to/templateFile" ) public function myFunction( arg1, arg2... );` in the wanted type.
 
@@ -67,7 +70,7 @@ This function will build all functions like that : `@:template( "my/path/to/temp
 public function myFunction( arg1, arg2... ){
   var x = "foo";
   ...
-  ftk.format.template.Template.buildFromFile( "my/path/to/templateFile" );
+  ftk.format.template.Macro.buildFromFile( "my/path/to/templateFile" );
 }
 ```
 
@@ -81,16 +84,9 @@ This function takes these arguments :
 public function myFunction( arg1, arg2... ){
   var x = "foo";
   ...
-  ftk.format.template.Template.buildFromString( "::x:: is not bar" ); // foo is not bar
+  ftk.format.template.Macro.buildFromString( "::x:: is not bar" ); // foo is not bar
 }
 ```
-#### A Helper macro init function to add and keep haxe std classes at compilation (used with the `addStd` run-time *Template* [constructor](#constructor-))
-- `addStd()`
-
-Add `--macro ftk.format.template.Template.addStd()` into the *.hxml* build file.
-
-This function will add and keep all the std classes to be available at run-time (when addStd is set at true in the *Template* constructor)
-
 #### Compilation directives
  - `-D hscriptPos` to report error line related to hscript macro exprs generator.
  - `-D hscript_template_macro_pos` to report error line related to generated expressions.
@@ -102,7 +98,7 @@ This function will add and keep all the std classes to be available at run-time 
 
 *You can also specify another template meta that will be used to detect template functions to generate. By default `@:template` is used but if you want to use `cheese` just do that* :
 ``` 
---macro ftk.format.template.Template.buildTemplates( "", true,":cheese" )
+--macro ftk.format.template.Macro.buildTemplates( "", true,":cheese" )
 ```
 So you'll have that as templates functions :
 ```
@@ -130,7 +126,7 @@ These variables are customizables, this way we can have custom keywords (see exa
 This function takes this argument :
 - `str` : Template's source
 
-### Run-time *Template* class
+### Run-time *Interp* class
 
 #### Constructor :
 - `new( runtimePos = true, addStd = false )`
@@ -142,7 +138,7 @@ This function takes these arguments :
 **Notes** : 
 - Don't forget to add `-D hscriptPos` if you set `runtimePos` at true to get the line position in error case !
 - Be sure that the std haxe classes are included (and all the wanted fields). You can add it in compilation with this init macro :
-  - `--macro ftk.format.template.Template.addStd()`
+  - `--macro ftk.format.template.Tools.addStd()`
 
 #### Main function that generates a template
 - `execute( hscriptSource : String, ?ctx : {}, isInclusion = false )`
@@ -160,6 +156,16 @@ This function takes this argument :
 
 #### Compilation directives
  - `-D hscriptPos` to report error line related to hscript macro exprs generator.
+
+#### Shortcut function (acts like Macro.buildFromString function):
+- `buildFromString( content : String, ?path : String, ?isFullPath : Bool )`
+```
+public function myFunction( arg1, arg2... ){
+  var x = "foo";
+  ...
+  ftk.format.template.Macro.buildFromString( "::x:: is not bar" ); // foo is not bar
+}
+```
 
 ## Examples
 Here is an example of working template source : 
@@ -192,8 +198,8 @@ var ctx = {
 	}
 }
 
-var tpl	= new ftk.format.template.Template( false, true );	// runTimePos = false, addStd = true
-trace( tpl.execute( output, ctx ) );
+var interp	= new ftk.format.template.Interp( false, true );	// runTimePos = false, addStd = true
+trace( interp.execute( output, ctx ) );
 ```
 So first we get the output from the parser : 
 ```
@@ -212,7 +218,7 @@ var __s__="";__s__+="Hello \"";__s__+=recipient.name;__s__+="\", your main compa
 	";}__s__+="
       ";}__s__+="";return __s__;
 ```
-And we give it to eat to the *Template*'s `execute` function and we get :
+And we give it to eat to the *Interp*'s `execute` function and we get :
 ```
 Hello "Mrs. Annie Cordy", your main company is : Company 1
 Bonjour Madame !
@@ -250,7 +256,7 @@ Here are your companies :
 	**fin**
 **fin**
 ```
-Here is a full example of the *Parser*'s output : https://try.haxe.org/#0682baBD
+Here is a full example of the *Parser*'s output : https://try.haxe.org/#75861c90
 ## Error handling
 
 For example if the template has an error like that (line 9) :
@@ -274,17 +280,17 @@ For example if the template has an error like that (line 9) :
 With this code :
 ```
 try{
-	return tpl.execute( output, ctx );
-}catch( e : ftk.format.template.Template.TemplateError ){
+	return interp.execute( output, ctx );
+}catch( e : ftk.format.template.Interp.InterpError ){
 	trace( e );
 }
 ```
 
 You will see `hscript:9: Unexpected token: ")" : }else if(() rand > .7 ){`
 
-**Note** : *You have to add `-D hscriptPos` to your build file in order to get error position and set `runtimePos`to true in the Template's constructor*
+**Note** : *You have to add `-D hscriptPos` to your build file in order to get error position and set `runtimePos`to true in the Interp's constructor*
 
-As you can see, the native TemplateError gives the piece of hscript source code and not the one from the template used.
+As you can see, the native InterpError gives the piece of hscript source code and not the one from the template used.
 
 In order to get your template's source code, you'll have to split your template by `\n` and get the right array index -1.
 
@@ -293,8 +299,8 @@ The line number is preserved and is the same between both the template and hscri
 So something like that should do the job :
 ```haxe
 try{
-	return tpl.execute( output, ctx );
-}catch( e : ftk.format.template.Template.TemplateError ){
+	return interp.execute( output, ctx );
+}catch( e : ftk.format.template.Interp.InterpError ){
 	var lines	= output.split( "\n" );
 	trace( lines[ e.native.line - 1 ] );
 }
@@ -315,20 +321,20 @@ a[ 0 ]	= '::do up = function( s ){ return s.toUpperCase(); }::';
 a[ 1 ]	= '::include( 0 )::Hello ::up( "filt3rek" ):: !';
 a[ 2 ]	= '::include( 0 )::Goodbye ::up( "filt3rek" ):: !';
 
-var tpl	= new ftk.format.template.Template();
-var p	= new ftk.format.template.Parser();
+var interp	= new ftk.format.template.Interp();
+var p		= new ftk.format.template.Parser();
 
 var ctx	= {
 	include	: function( ind : Int ){
-		var ret	= tpl.execute( '__hscriptSource__( \'__s__+=${ escapeQuotes( p.parse( a[ ind ] ) ) };\' )' );	// (1)
+		var ret	= interp.execute( '__hscriptSource__( \'__s__+=${ escapeQuotes( p.parse( a[ ind ] ) ) };\' )' );	// (1)
 		// OR using a template's helper function :
-		var ret	= tpl.include( p.parse( a[ ind ] ) );								// (2)
+		var ret	= interp.include( p.parse( a[ ind ] ) );								// (2)
 		return ret;
 	}
 }
 var source	= '::include( 0 )::::include( 1 ):: It\'s a test ! ::include( 2 )::';
 var source2	= p.parse( source );
-trace( tpl.execute( source2, ctx ) );
+trace( interp.execute( source2, ctx ) );
 }
 ```
 That gives you : `Hello FILT3REK ! It's a test ! Goodbye FILT3REK !`
@@ -340,20 +346,28 @@ Then, here I call array here, but for my projects, I often load another template
 ### 2 methods here :
 
  1. Manual injection.
-You have to escape quotes by your own, if needed, when you directly call the `__hscriptSource__` context's function, what can be done using another helper function `escapeQuotes` on Template's class :
+You have to escape quotes by your own, if needed, when you directly call the `__hscriptSource__` context's function, what can be done using another helper function `escapeQuotes` on Interp's class :
 ```
 public function escapeQuotes( s : String ){
 	return s.split( '"' ).join( '\\"' ).split( "'" ).join( "\\'" );
 }
 ```
- 2. There also is a `include` **helper function** on *Template*'s class that do "safetly" inclusion for you (i.e. by escaping quotes)
+ 2. There also is a `include` **helper function** on *Interp*'s class that do "safetly" inclusion for you (i.e. by escaping quotes)
 
-But you can also use the helper function `escapeQuotes` on *Template*'s class
+But you can also use the helper function `escapeQuotes` on *Interp*'s class
+
+### Compile-time *Tools* class
+#### A Helper macro init function to add and keep haxe std classes at compilation (used with the `addStd` run-time *Interp* [constructor](#constructor-))
+- `addStd()`
+
+Add `--macro ftk.format.template.Tools.addStd()` into the *.hxml* build file.
+
+This function will add and keep all the std classes to be available at run-time (when addStd is set at true in the *Interp* constructor)
 
 
 ## String interpolation
 
-Because by default *hscript* doesn't manage string interpolation even in macro mode, *Template* class does it.
+Because by default *hscript* doesn't manage string interpolation even in macro mode, *hscript-template* does it.
 
 But if you have a `$` var inside your template source, (i.e. an inlined JS script that uses the `$` sign, you can escape it using `$$`
 
