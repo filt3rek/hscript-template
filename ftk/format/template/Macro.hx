@@ -224,6 +224,7 @@ class Macro{
 		return e;
 	}
 
+#if macro
 #if hscript_template_macro_pos
 	static function checkExpr( expr : Expr, exprsBuf : Array<Expr>, line : Int, content : String, path : String ) : Int {
 		var skip	= true;
@@ -311,7 +312,6 @@ class Macro{
 	}
 #end
 
-#if macro
 	static function checkStringInterpolation( e : Expr ){
 		switch e.expr {
 			case EConst( CString( s ) )	:
