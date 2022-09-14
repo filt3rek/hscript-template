@@ -75,7 +75,7 @@ class Interp {
 			} );
 		}
 
-		hinterp.variables.set( "__toString__", Std.string );
+		hinterp.variables.set( "__toString__", __toString__ );
 		hinterp.variables.set( "__hscriptSource__", function ( __hscriptSource__ ){
 			if( runtimePos ){	
 				sourcesStack.push( currentSource );
@@ -96,6 +96,10 @@ class Interp {
 				hinterp.variables.set( path[ path.length - 1 ], Type.resolveClass( cname ) );
 			}
 		}
+	}
+
+	public dynamic function __toString__( o : Null<Dynamic> ) : String {
+		return Std.string( o );
 	}
 
 	/*  
