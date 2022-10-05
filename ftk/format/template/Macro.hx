@@ -247,13 +247,13 @@ class Macro{
 							case ECall(_, params):
 								for( ee in params ){
 									var ident	= ee.toString();
-									var v		= macro var $ident : Dynamic = null;
+									var v		= macro var $ident = null;
 									line		= checkExpr( v, exprsBuf, line, content, path );
 								}
 							case EConst(CIdent(s)) : 
 								var c	= s.substr( 0, 1 );
 								if( c == c.toLowerCase() ){
-									var v	= macro var $s : Dynamic = null;
+									var v	= macro var $s = null;
 									line	= checkExpr( v, exprsBuf, line, content, path );
 								}
 							case _ : throw val.toString() + " Not implemented";
@@ -267,7 +267,7 @@ class Macro{
 				switch eit.expr {
 					case EBinop(_,e1,e2)	: 
 						var ident	= e1.toString();
-						var v		= macro var $ident : Dynamic = null;
+						var v		= macro var $ident = null;
 						line		= checkExpr( v, exprsBuf, line, content, path );
 						line		= checkExpr( eexpr, exprsBuf, line, content, path );
 					case _ :
@@ -284,7 +284,7 @@ class Macro{
 			case EBreak	:
 				var rand	= Math.floor( Math.random() * 1000000 );
 				var ident	= "_" + rand;
-				var v 		= macro var $ident : Dynamic = null;
+				var v 		= macro var $ident = null;
 				line		= checkExpr( v, exprsBuf, line, content, path );
 			case _ :
 				skip	= false;

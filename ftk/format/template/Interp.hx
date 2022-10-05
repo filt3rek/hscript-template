@@ -98,7 +98,7 @@ class Interp {
 		}
 	}
 
-	public dynamic function __toString__( o : Null<Dynamic> ) : String {
+	public dynamic function __toString__( o : Null<Any> ) : String {
 		return Std.string( o );
 	}
 
