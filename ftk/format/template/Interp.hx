@@ -27,8 +27,24 @@ class InterpError {
 	}
 }
 
+// "_" added to prevent https://github.com/HaxeFoundation/haxe/issues/10820
+class _HScriptInterp extends hscript.Interp{
+	override function call( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
+		function _call(){
+			try{
+				return Reflect.callMethod(o,f,args);
+			}catch( e ){
+				// Get errors infos
+				error( ECustom( e.toString() ) );
+				return null;
+			}
+		}
+		return _call();
+	}
+}
+
 class Interp {
-	var hinterp			: hscript.Interp;
+	var hinterp			: _HScriptInterp;
 
 	var runtimePos		: Bool;
 	var currentSource	: String;
@@ -65,7 +81,7 @@ class Interp {
 
 	public function new( runtimePos = true, addStd = false ) {
 		this.runtimePos	= runtimePos;
-		hinterp 		= new hscript.Interp();
+		hinterp 		= new _HScriptInterp();
 
 		if( runtimePos ){
 			sourcesStack	= [];
