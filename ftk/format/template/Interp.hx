@@ -29,17 +29,14 @@ class InterpError {
 
 // "_" added to prevent https://github.com/HaxeFoundation/haxe/issues/10820
 class _HScriptInterp extends hscript.Interp{
-	override function call( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
-		function _call(){
-			try{
-				return Reflect.callMethod(o,f,args);
-			}catch( e ){
-				// Get errors infos
-				error( ECustom( e.toString() ) );
-				return null;
-			}
+	override function fcall( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
+		try{
+			return call(o, get(o, f), args);
+		}catch( e ){
+			// Get errors infos
+			error( ECustom( e.toString() ), true );
+			return null;
 		}
-		return _call();
 	}
 }
 
