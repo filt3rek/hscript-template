@@ -29,6 +29,8 @@ class InterpError {
 
 // "_" added to prevent https://github.com/HaxeFoundation/haxe/issues/10820
 class _HScriptInterp extends hscript.Interp{
+	public var useStrictVariableResolution	= true;
+
 	override function fcall( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
 		try{
 			return call(o, get(o, f), args);
@@ -37,6 +39,16 @@ class _HScriptInterp extends hscript.Interp{
 			error( ECustom( e.toString() ), true );
 			return null;
 		}
+	}
+
+	override function resolve( id : String ) : Dynamic {
+		var l = locals.get(id);
+		if( l != null )
+			return l.r;
+		var v = variables.get(id);
+		if( v == null && !variables.exists(id) && useStrictVariableResolution )
+			error(EUnknownVariable(id));
+		return v;
 	}
 }
 
@@ -48,6 +60,15 @@ class Interp {
 
 	var sourcesStack	: Array<String>;	// inclusions' sources
 	var aSources		: Array<String>;	// functions' calls sources
+
+	public var useStrictVariableResolution	(get,set)	: Bool;	// gives null instead of throwing EUnknownVariable when resolving an unknown variable
+	
+	function set_useStrictVariableResolution( b : Bool ){
+		return hinterp.useStrictVariableResolution	= b;
+	}
+	function get_useStrictVariableResolution(){
+		return hinterp.useStrictVariableResolution;
+	}
 
 	/*
 	*	Run-time shortcut working like Macro.build.buildFromString()
@@ -72,13 +93,14 @@ class Interp {
 	*	
 	*	@param	?runtimePos	: If set to true, it will manage source code if errors occurs, especially when using inclusions. true by dafault
 	*	@param	?addStd		: If set to true, adds some standard haxe classes (Std, Math, Date, StringTools...)
+	*	@param	?isStrict	: If set to false, it will be more permissive and allow access unknow variables for example
 	*
 	*	Add `-D hscriptPos` to report error line related to hscript interpreter exprs generator. A bit slower when set to true.
 	*/
 
 	public function new( runtimePos = true, addStd = false ) {
-		this.runtimePos	= runtimePos;
-		hinterp 		= new _HScriptInterp();
+		this.runtimePos		= runtimePos;
+		hinterp 			= new _HScriptInterp();
 
 		if( runtimePos ){
 			sourcesStack	= [];
