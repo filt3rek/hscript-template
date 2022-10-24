@@ -156,11 +156,11 @@ class Interp {
 			hinterp.variables.set( field, Reflect.field( ctx, field ) );
 		}
 		
-		var expr	= new hscript.Parser().parseString( hscriptSource );
-		if( runtimePos ){
-			addSources( expr, hscriptSource );
-		}
 		try{
+			var expr	= new hscript.Parser().parseString( hscriptSource );
+			if( runtimePos ){
+				addSources( expr, hscriptSource );
+			}
 			if( !isInclusion ){
 				return hinterp.execute( expr );
 			}else{
