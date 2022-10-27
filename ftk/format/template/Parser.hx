@@ -168,7 +168,8 @@ class Parser{
 					if( isInComment ){
 						addComment( DO + s );
 					}else{
-						out	+= '$s;';
+						out	+= '$s';
+						if( !s.trim().endsWith( ";" ) ) out+= ";";
 					}
 				case EElse		: 
 					if( isInComment ){

@@ -155,7 +155,6 @@ class Interp {
 		for( field in Reflect.fields( ctx ) ){
 			hinterp.variables.set( field, Reflect.field( ctx, field ) );
 		}
-		
 		try{
 			var expr	= new hscript.Parser().parseString( hscriptSource );
 			if( runtimePos ){
