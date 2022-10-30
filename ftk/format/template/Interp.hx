@@ -5,7 +5,7 @@ import hscript.Expr;
 using hscript.Tools;
 
 /**
- * @version 2.0.0
+ * @version 2.1.2
  * @author filt3rek
  */
 
@@ -110,7 +110,7 @@ class Interp {
 			} );
 		}
 
-		hinterp.variables.set( "__toString__", __toString__ );
+		hinterp.variables.set( "__toString__", (o)->__toString__(o) );
 		hinterp.variables.set( "__hscriptSource__", function ( __hscriptSource__ ){
 			if( runtimePos ){	
 				sourcesStack.push( currentSource );

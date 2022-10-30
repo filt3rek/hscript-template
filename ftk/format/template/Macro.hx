@@ -10,7 +10,7 @@ using StringTools;
 using haxe.macro.ExprTools;
 
 /**
- * @version 2.0.0
+ * @version 2.1.2
  * @author filt3rek
  */
 
