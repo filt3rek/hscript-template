@@ -1,5 +1,6 @@
 package ftk.format.template;
 
+import haxe.PosInfos;
 import hscript.Expr;
 
 using hscript.Tools;
@@ -9,13 +10,34 @@ using hscript.Tools;
  * @author filt3rek
  */
 
-class InterpError {
-	public var source	(default,null)	: Null<String>;
-	public var native	(default,null)	: Error;
+@:structInit
+class StackItem{
+	public var o		: Dynamic;
+	public var f		: Dynamic;
+	public var args		: Array<Dynamic>;
+	public var curExpr	: Expr;
+	public var pos		: PosInfos;
 
-	public function new( native : Error, ?source : String ){
+	public function toString(){
+		return Std.string({
+			o		: o,
+			f		: f,
+			args	: args,
+			curExpr	: curExpr.e,
+			pos		: pos,
+		});
+	}
+}
+
+class InterpError {
+	public var source		(default,null)	: Null<String>;
+	public var native		(default,null)	: Error;
+	public var callStack	(default,null)	: Array<StackItem>;
+
+	public function new( native : Error, ?source : String, ?callStack : Array<StackItem> ){
 		this.native		= native;
 		this.source		= source;
+		this.callStack	= callStack;
 	}
 
 	public function toString(){
@@ -33,11 +55,13 @@ class _HScriptInterp extends hscript.Interp{
 
 	override function fcall( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
 		try{
-			return call(o, get(o, f), args);
+			return super.call(o, get(o, f), args);
+		}catch( e : InterpError ){
+			e.callStack.unshift( ({ o : o, f : f, args : args, curExpr : curExpr, pos : posInfos() }:StackItem) );
+			throw e;
 		}catch( e ){
 			// Get errors infos
-			error( ECustom( e.toString() ), true );
-			return null;
+			throw new InterpError( #if hscriptPos new Error( #end ECustom( e.message )#if hscriptPos , null, null, "hscript", -1 )#end, ([ { o : o, f : f, args : args, curExpr : curExpr, pos : posInfos() } ]:Array<StackItem>) );
 		}
 	}
 
@@ -166,6 +190,7 @@ class Interp {
 				return @:privateAccess hinterp.exprReturn( expr );
 			}
 		}catch( e : InterpError ){
+			if( e.source == null && runtimePos )	throw new InterpError( e.native, runtimePos ? currentSource : null, e.callStack );
 			throw e;
 		}catch( e : Error ){
 			throw new InterpError( e, runtimePos ? currentSource : null );
