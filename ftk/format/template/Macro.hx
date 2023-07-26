@@ -7,6 +7,7 @@ import haxe.macro.MacroStringTools;
 import hscript.Macro;
 
 using StringTools;
+using ftk.Strings;
 using haxe.macro.ExprTools;
 
 /**
@@ -35,7 +36,7 @@ class Macro{
 	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
 	*/
 
-	public static function buildTemplates( pathFilter = "", recursive = false, ?templateMeta : String, ?pos : haxe.PosInfos ){
+	public static function buildTemplates( paths : Array<String>, ?ignore : Array<String>, ?templateMeta : String, ?pos : haxe.PosInfos ){
 #if hscript_template_build_trace
 		trace( pos.fileName );
 #end
@@ -45,7 +46,95 @@ class Macro{
 		if( templateMeta != null ){
 			Macro.templateMeta	= templateMeta;
 		}
-		Compiler.addGlobalMetadata( pathFilter, '@:build( ftk.format.template.Macro.build() )', recursive );
+		addGlobalMetadata( '@:build( ftk.format.template.Macro.build() )', paths, ignore );
+	}
+
+	public static function addGlobalMetadata( meta:String, paths : Array<String>, ?ignore : Array<String> ){
+		processModule( function( cl ) haxe.macro.Compiler.addGlobalMetadata( cl, meta, false ), paths, ignore );
+	}
+
+	// `my.exact.Class` or `my.not_recurive.package` or `my.recursive.package.`
+	static function processModule( f : String->Void, paths : Array<String>, ?ignore : Array<String> ) {
+		switch Context.definedValue( "display" ) {
+			case null, "usage"	:
+			case _				: return;
+		}
+		ignore ??= [];
+		var classPaths = Context.getClassPath();
+		for( i in 0...classPaths.length ) {
+			var cp = classPaths[ i ].split( "\\" ).join( "/" );
+			if( cp.endsWith( "/" ) )
+				cp = cp.substr( 0, -1 );
+			if ( cp == "" )
+				cp = ".";
+			classPaths[ i ] = cp;
+		}
+		function checkDir( path : String, pack : String, recursive : Bool ){
+			if( !sys.FileSystem.exists( path ) ){
+				return;
+			}
+			for( file in sys.FileSystem.readDirectory( path ) ){
+				if( sys.FileSystem.isDirectory( path + "/" + file ) && recursive ){
+					checkDir( path + "/" + file, pack == "" ? file : pack + "." + file, recursive );
+				}else{
+					if( file == "import.hx" || !file.endsWith( ".hx" ) || file.substr( 0, file.length - 3 ).indexOf( "." ) > -1 )
+						continue;
+					var module	= ( pack == "" ? "" : pack + "." ) + file.substr( 0, -3 );
+					if( paths.indexOf( module ) > -1 ){
+						f( module );
+					}else{
+						for( gpath in paths ){
+							if( module.indexOf( gpath ) > -1 && ignore.indexOf( module ) == -1 ){
+								var skip	= false;
+								for( gignore in ignore ){
+									if( module.indexOf( gignore ) > -1 ){
+										if( gignore.endsWith( "." ) ){
+											skip	= true;
+										}else{
+											var apack	= module.split( "." );
+											apack.pop();
+											if( gignore == apack.join( "." ) ){
+												skip = true;
+											}
+										}
+									}
+								}
+								if( !skip ){
+									f( module );
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		var _paths	= [];
+		for( path in paths ){
+			var split		= path.split( "." );
+			var firstChar	= split[ split.length - 1 ].charAt( 0 );
+			if( firstChar != "" && firstChar == firstChar.toUpperCase() ){
+				split.pop();
+				path	= split.join( "." );
+				if( _paths.indexOf( path ) == -1 ){
+					_paths.push( path );
+				}
+			}else{
+				if( _paths.indexOf( path ) == -1 ){
+					_paths.push( path );
+				}
+			}
+		}
+		for( cp in classPaths ) {
+			for( path in _paths ){
+				var recursive	= false;
+				if( path.endsWith( "." ) ) {
+					path	= path.substr( 0, -1 );
+					recursive	= true;
+				}
+				var p = path == '' ? cp : cp + "/" + path.split( "." ).join( "/" );
+				checkDir( p, path, recursive );
+			}
+		}
 	}
 
 	// Build macro
@@ -267,7 +356,7 @@ class Macro{
 				switch eit.expr {
 					case EBinop(_,e1,e2)	: 
 						var ident	= e1.toString();
-						var v		= macro var $ident = null;
+						var v		= macro var $ident = ([ for( i in ($e2:Array<Dynamic>) ) i ])[ 0 ];
 						line		= checkExpr( v, exprsBuf, line, content, path );
 						line		= checkExpr( eexpr, exprsBuf, line, content, path );
 					case _ :

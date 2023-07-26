@@ -1,0 +1,13 @@
+{
+	"name"			: "hscript-template",
+	"url"			: "https://github.com/filt3rek/hscript-template",
+	"license"		: "MIT",
+	"tags"			: ["hscript", "cross", "template"],
+	"description"	: "Little run-time and compile-time template system based on hscript",
+	"version"		: "2.1.2",
+	"releasenote"	: "Bug fix https://github.com/HaxeFoundation/haxe/issues/10836",
+	"contributors"	: ["filt3rek"],
+	"dependencies"	: {
+	  "hscript": ""
+	}
+}

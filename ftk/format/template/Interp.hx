@@ -30,9 +30,9 @@ class StackItem{
 }
 
 class InterpError {
-	public var source		(default,null)	: Null<String>;
 	public var native		(default,null)	: Error;
-	public var callStack	(default,null)	: Array<StackItem>;
+	public var source		(default,null)	: Null<String>;
+	public var callStack	(default,null)	: Null<Array<StackItem>>;
 
 	public function new( native : Error, ?source : String, ?callStack : Array<StackItem> ){
 		this.native		= native;
