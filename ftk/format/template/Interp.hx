@@ -40,6 +40,14 @@ class InterpError {
 		this.callStack	= callStack;
 	}
 
+	public function toObject(){
+		return {
+			native		: native,
+			source		: source,
+			callStack	: callStack
+		}
+	}
+
 	public function toString(){
 #if hscriptPos
 		return source != null ? native.toString() + " : " + source.split( "\n" )[ native.line -1 ] : native.toString();
