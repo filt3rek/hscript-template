@@ -178,7 +178,7 @@ class Interp {
 	/*  
 	*	Main function that interprets a template
 	*	
-	*	@param	source		: native source given to template's Parser
+	*	@param	source		: "native" template
 	*	@param	ctx			: Set of fields to include in hscript context
 	*	@param	isInclusion	: Used internally.
 	*
