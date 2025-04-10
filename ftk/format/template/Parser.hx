@@ -101,6 +101,9 @@ class Parser{
 #end
 #if macro
 		out	= '{var __comments__=[];var __s__="";';
+#if hscript_template_macro_pos
+		out	+= "function __newlines__(s){}";
+#end
 #else
 		out	= '{__comments__=[];__s__="";';
 #end
@@ -168,8 +171,18 @@ class Parser{
 					if( isInComment ){
 						addComment( DO + s );
 					}else{
+#if ( macro && hscript_template_macro_pos )
+						var a	= s.split( "\n" );
+						out	+= '${ a.join( "" ) }';
+						if( !s.trim().endsWith( ";" ) ) out+= ";";
+						for( i in 0... a.length - 1 ){
+							out	+= "__newlines__('
+');";
+						}
+#else
 						out	+= '$s';
 						if( !s.trim().endsWith( ";" ) ) out+= ";";
+#end
 					}
 				case EElse		: 
 					if( isInComment ){
