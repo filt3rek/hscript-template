@@ -394,7 +394,7 @@ class Macro{
 					offset		+= cline.length + 1;
 				}
 				var pos	= Context.makePosition( { file : path, min : offset, max : offset } );
-				Context.fatalError( ex.toString(), pos  );
+				Context.fatalError( s + "\n" + ex.toString(), pos  );
 			}
 		}
 		return line;
