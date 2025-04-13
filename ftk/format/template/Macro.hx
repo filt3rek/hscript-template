@@ -356,7 +356,7 @@ class Macro{
 				switch eit.expr {
 					case EBinop(_,e1,e2)	: 
 						var ident	= e1.toString();
-						var v		= macro var $ident = ([ for( i in ($e2:Array<Dynamic>) ) i ])[ 0 ];
+						var v		= macro var $ident = ([ for( i in $e2 ) i ])[ 0 ];
 						line		= checkExpr( v, exprsBuf, line, content, path );
 						line		= checkExpr( eexpr, exprsBuf, line, content, path );
 					case _ :
@@ -394,7 +394,7 @@ class Macro{
 					offset		+= cline.length + 1;
 				}
 				var pos	= Context.makePosition( { file : path, min : offset, max : offset } );
-				Context.fatalError( s + "\n" + ex.toString(), pos  );
+				Context.fatalError( ex.toString(), pos  );
 			}
 		}
 		return line;
