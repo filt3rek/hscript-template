@@ -6,7 +6,7 @@ import hscript.Expr;
 using hscript.Tools;
 
 /**
- * @version 2.1.2
+ * @version 3.0.0
  * @author filt3rek
  */
 
@@ -57,9 +57,8 @@ class InterpError {
 	}
 }
 
-// "_" added to prevent https://github.com/HaxeFoundation/haxe/issues/10820
 @:allow( ftk.format.template.Interp )
-class _HScriptInterp extends hscript.Interp{
+class HScriptInterp extends hscript.Interp{
 	var useStrictVariableResolution	= true;
 
 	override function fcall( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
@@ -86,7 +85,7 @@ class _HScriptInterp extends hscript.Interp{
 }
 
 class Interp {
-	var hinterp			: _HScriptInterp;
+	var hsInterp		: HScriptInterp;
 
 	var parser			: Parser;
 	var runtimePos		: Bool;
@@ -98,28 +97,10 @@ class Interp {
 	public var useStrictVariableResolution	(get,set)	: Bool;	// gives null instead of throwing EUnknownVariable when resolving an unknown variable
 	
 	function set_useStrictVariableResolution( b : Bool ){
-		return hinterp.useStrictVariableResolution	= b;
+		return hsInterp.useStrictVariableResolution	= b;
 	}
 	function get_useStrictVariableResolution(){
-		return hinterp.useStrictVariableResolution;
-	}
-
-	/*
-	*	Run-time shortcut working like Macro.build.buildFromString()
-	*	Usage : 
-	*	```
-	*	public function myFunction( arg1, arg2... ){
-	*		var x = "foo";
-	*		...
-	*		ftk.format.template.Interp.buildFromString( "::x:: is not bar" );	// foo is not bar
-	*	}
-	*	```
-	*	@param	content	: source template
-	*	@param	?ctx	: Set of fields to include in hscript context
-	*/
-
-	public static function buildFromString( content : String, ?ctx : {} ){
-		return new Interp().execute( content, ctx );
+		return hsInterp.useStrictVariableResolution;
 	}
 
 	/*  
@@ -136,20 +117,20 @@ class Interp {
 	public function new( runtimePos = true, addStd = false, isStrict = true, ?parser : Parser ) {
 		this.runtimePos				= runtimePos;
 		this.parser					= parser ?? new Parser();
-		hinterp 					= new _HScriptInterp();
+		hsInterp 					= new HScriptInterp();
 		useStrictVariableResolution	= isStrict;
 
 		if( runtimePos ){
 			sourcesStack	= [];
 			callSources		= [];
 
-			hinterp.variables.set( "__currentSource__", function( index ){
+			hsInterp.variables.set( "__currentSource__", function( index ){
 				currentSource	= callSources[ index ];
 			} );
 		}
 
-		hinterp.variables.set( "__toString__", (o)->__toString__(o) );
-		hinterp.variables.set( "__include__", function ( __source__ ){
+		hsInterp.variables.set( "__toString__", (o)->__toString__(o) );
+		hsInterp.variables.set( "__include__", function ( __source__ ){
 			if( runtimePos ){	
 				sourcesStack.push( currentSource );
 				currentSource	= __source__;
@@ -166,7 +147,7 @@ class Interp {
 		if( addStd ){
 			for( cname in Tools.stdClasses ){
 				var path	= cname.split( "." );
-				hinterp.variables.set( path[ path.length - 1 ], Type.resolveClass( cname ) );
+				hsInterp.variables.set( path[ path.length - 1 ], Type.resolveClass( cname ) );
 			}
 		}
 	}
@@ -192,7 +173,7 @@ class Interp {
 
 		if( ctx == null )	ctx	= {};
 		for( field in Reflect.fields( ctx ) ){
-			hinterp.variables.set( field, Reflect.field( ctx, field ) );
+			hsInterp.variables.set( field, Reflect.field( ctx, field ) );
 		}
 
 		try{
@@ -201,9 +182,9 @@ class Interp {
 				addSources( expr, source );
 			}
 			if( !isInclusion ){
-				return hinterp.execute( expr );
+				return hsInterp.execute( expr );
 			}else{
-				return @:privateAccess hinterp.exprReturn( expr );
+				return @:privateAccess hsInterp.exprReturn( expr );
 			}
 		}catch( e : InterpError ){
 			if( e.source == null && runtimePos )	throw new InterpError( e.native, runtimePos ? currentSource : null, e.callStack );
@@ -212,7 +193,7 @@ class Interp {
 			throw new InterpError( e, runtimePos ? currentSource : null );
 		}catch( e ){
 #if hscriptPos
-			var pos	= hinterp.posInfos();
+			var pos	= hsInterp.posInfos();
 			throw new InterpError( new Error( ECustom( e.message ), 0, 0, pos.fileName, pos.lineNumber ), runtimePos ? currentSource : null );
 #else
 			throw new InterpError( ECustom( e.message ), runtimePos ? currentSource : null );

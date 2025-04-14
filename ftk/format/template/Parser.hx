@@ -3,14 +3,14 @@ package ftk.format.template;
 using StringTools;
 
 /**
- * @version 2.1.2
+ * @version 3.0.0
  * @author filt3rek
  */
 
 enum ETemplateToken{
 	EText( s : String );
 	EExpr( s : String );
-	EDo( s : String );
+	ELet( s : String );
 	EIf( s : String );
 	EElseIf( s : String );
 	EElse;
@@ -23,18 +23,18 @@ enum ETemplateToken{
 }
 
 class Parser{
-	public var SIGN		= ":";
-	public var COMMENT	= "*";
-	public var IF		= "if";
-	public var ELSE		= "else";
-	public var ELSEIF	= "elseif";
-	public var FOR		= "for";
-	public var WHILE	= "while";
-	public var BREAK	= "break";
-	public var SWITCH	= "switch";
-	public var CASE		= "case";
-	public var END		= "end";
-	public var DO		= "do";
+	static inline final SIGN	= ":";
+	static inline final COMMENT	= "*";
+	static inline final IF		= "if";
+	static inline final ELSE	= "else";
+	static inline final ELSEIF	= "elseif";
+	static inline final FOR		= "for";
+	static inline final WHILE	= "while";
+	static inline final BREAK	= "break";
+	static inline final SWITCH	= "switch";
+	static inline final CASE	= "case";
+	static inline final END		= "end";
+	static inline final LET		= "do";
 
 	var source		: String;
 	var comments	: String;
@@ -167,9 +167,9 @@ class Parser{
 					}else{
 						out	+= 'while($s){';
 					}
-				case EDo( s ) 	: 
+				case ELet( s ) 	: 
 					if( isInComment ){
-						addComment( DO + s );
+						addComment( LET + s );
 					}else{
 #if ( macro && hscript_template_macro_pos )
 						var a	= s.split( "\n" );
@@ -257,9 +257,9 @@ class Parser{
 			}else if( sub == CASE ){
 				sub	= source.substr( start, pos - start - 2 );
 				return ECase( sub );
-			}else if( sub == DO ){
+			}else if( sub == LET ){
 				sub	= source.substr( start, pos - start - 2 );
-				return EDo( sub );
+				return ELet( sub );
 			}else if( sub == ELSE ){
 				return EElse;
 			}else if( sub == BREAK ){
@@ -283,10 +283,10 @@ class Parser{
 	inline function seekSign(){
 		var isEOF = true;
 		while( pos < len ){
-			var c	= source.charAt( pos++ );
-			if( c == SIGN ){
-				c	= source.charAt( pos++ );
-				if( c == SIGN )	{
+			var c	= source.charCodeAt( pos++ );
+			if( c == ":".code ){
+				c	= source.charCodeAt( pos++ );
+				if( c == ":".code )	{
 					isEOF	= false;
 					break;
 				}
@@ -297,12 +297,12 @@ class Parser{
 
 	inline function seekSpecial(){
 		while( pos < len ){
-			if( isSpecial( source.charAt( pos ) ) )	break;
+			if( isSpecial( source.charCodeAt( pos ) ) )	break;
 			pos++;
 		}
 	}
 
-	inline function isSpecial( c : String ){
-		return c == " " || c == "\t" || c == "\r" || c == "\n" || c == "(" || c == SIGN;
+	inline function isSpecial( c : Int ){
+		return c == " ".code || c == "\t".code || c == "\r".code || c == "\n".code || c == "(".code || c == ":".code; // SIGN
 	}
 }

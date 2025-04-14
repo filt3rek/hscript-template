@@ -7,11 +7,11 @@ import haxe.macro.MacroStringTools;
 import hscript.Macro;
 
 using StringTools;
-using ftk.Strings;
 using haxe.macro.ExprTools;
+using ftk.Strings;
 
 /**
- * @version 2.1.2
+ * @version 3.0.0
  * @author filt3rek
  */
 
@@ -184,7 +184,7 @@ class Macro{
 									Context.fatalError( e.message, field.pos );
 								}
 								var pos		= Context.makePosition( { file : path, min : 0, max : 0 } );
-								var expr	= macro @:pos( pos ) ftk.format.template.Macro.buildFromString( $v{ content }, $v{ path }, true );
+								var expr	= macro @:pos( pos ) @:privateAccess ftk.format.template.Macro.buildFromString( $v{ content }, $v{ path } );
 								f.expr	= expr;
 							}
 						}
@@ -197,72 +197,12 @@ class Macro{
 #end
 
 	// Expr macro
-	
-	/*  
-	*	Manual function that builds the template from a file
-	*	Usage : 
-	*	```
-	*	public function myFunction( arg1, arg2... ){
-	*		var x = "foo";
-	*		...
-	*		ftk.format.template.Macro.buildFromFile( "my/path/to/templateFile" );
-	*	}
-	*	```
-	*	@param	path		: path to the file that contains the template's source
-	*	@param	?isFullPath	: relative to the class (false) or to the project (true)
-	*
-	*	Add `-D hscriptPos` to report error line related to hscript macro exprs generator
-	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
-	*/
 
-	macro public static function buildFromFile( path : String, ?isFullPath : Bool ) {
+	macro static function buildFromString( content : String, path : String ){
 #if display
 		return;
 #end
 		var pos		= Context.currentPos();
-
-		if( !isFullPath ){
-			path	= getFullPath( path );
-		}
-
-		var content = try{
-			sys.io.File.getContent( path );
-		}catch( e ){
-			Context.fatalError( e.message, pos );
-		}
-
-		pos	= Context.makePosition( { file : path, min : 0, max : 0 } );
-		
-		return macro @:pos( pos ) ftk.format.template.Macro.buildFromString( $v{ content }, $v{ path }, true );
-	}
-
-	/*  
-	*	Manual function that builds the template from a string
-	*	Usage : 
-	*	```
-	*	public function myFunction( arg1, arg2... ){
-	*		var x = "foo";
-	*		...
-	*		ftk.format.template.Macro.buildFromString( "::x:: is not bar" );	// foo is not bar
-	*	}
-	*	```
-	*	@param	content		: source template
-	*	@param	?path		: path to the file that contains the template's source
-	*	@param	?isFullPath	: relative to the class (false) or to the project (true)
-	*
-	*	Add `-D hscriptPos` to report error line related to hscript macro exprs generator
-	*	Add `-D hscript_template_macro_pos` to report error line related to generated expressions
-	*/
-
-	macro public static function buildFromString( content : String, ?path : String, ?isFullPath : Bool ){
-#if display
-		return;
-#end
-		var pos	= Context.currentPos();
-
-		if( path != null && !isFullPath ){
-			path	= getFullPath( path );
-		}
 
 		var parser	= new hscript.Parser();
 			parser.identChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_$";	// $ added in order to get i.e. record-macros working
@@ -285,9 +225,6 @@ class Macro{
 		}
 #end
 		catch( e ){
-			if( path != null ){
-				pos	= Context.makePosition( { file : path, min : 0, max : 0 } );
-			}
 			Context.fatalError( e.message, pos );
 		}
 
@@ -302,9 +239,7 @@ class Macro{
 #end
 				for( ee in a ){
 #if hscript_template_macro_pos
-					if( path != null ){
-						line = checkExpr( ee, exprsBuf, line, content, path );
-					}
+					line = checkExpr( ee, exprsBuf, line, content, path );
 #end
 					checkStringInterpolation( ee );
 				}
