@@ -4,8 +4,8 @@
 	"license"		: "MIT",
 	"tags"			: ["hscript", "cross", "template"],
 	"description"	: "Little run-time and compile-time template system based on hscript",
-	"version"		: "2.1.2",
-	"releasenote"	: "Bug fix https://github.com/HaxeFoundation/haxe/issues/10836",
+	"version"		: "3.0.0",
+	"releasenote"	: "",
 	"contributors"	: ["filt3rek"],
 	"dependencies"	: {
 	  "hscript": ""
