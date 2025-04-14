@@ -9,6 +9,8 @@ This is a set of simple classes structured like hscript classes :
 
 You get a full template system working both on compile-time and run-time.
 
+#  :warning: Rework in progress : The examples below work until commit 4cddf98
+
 The syntax is close to the `haxe.Template` or [tink_template](https://github.com/haxetink/tink_template) one and it supports **expressions output, if, else, elseif, switch, case, while, break, for** statements, **"do"** and **comments**.
 
 - [Installation](#installation)
